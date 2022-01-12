@@ -291,7 +291,7 @@ The number of viral protein is : xxx
 
 ------------
 
-### HMMER analysis on candidat loci
+### HMMER analysis on candidat loci - depracted, I now use Interproscan 
 
 Each candidate locus should, if of viral origin, return particular domains known to be present in free viruses when tested via HMMER. This analysis will thus allow us to (i) confirm the viral character of a candidate locus and (ii) study the presence or absence of known domains within the loci, telling us more about the putative function of this locus beyond a simple ontological assignment by taking over the one assigned to a homologous viral protein. 
 
@@ -413,7 +413,7 @@ Important file created : **/beegfs/data/bguinet/these/Augustus_search_analysis/A
 
 ______________________
 
-## Repeat elements in scaffolds
+## Repeat elements in scaffolds (Depracted, I now used the Repeatpreps db) 
 
 Since few sequenced viral genomes have ETs, or rarely more than one, then the probability that a viral gene flanked by an ET (which would have jumped into the viral genome beforehand) will integrate into the host genome is low. (Gilbert et al 2017). It is thought that this is because the majority of ET integrations in viral genomes are deleterious and are therefore eliminated by negative selection.  This is even lower if 2 ETs are found in the flanks of the EVEs and/or if it can be shown that the ET(s) present in the flanks are present elsewhere in the host genome.
 
