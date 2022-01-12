@@ -123,6 +123,7 @@ rule Filter_loci:
 		{mmseqs2} search /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db {input.Nr_db}  /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr_tpm 
 		{mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tcov' /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db /beegfs/data/bguinet/these/NR_db /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr {output.Candidate_loci_Nr_output} -s 7 --threads 20
 		python3 Filter_loci_with_NR.py  -Nr {output.Candidate_loci_Nr_output} -o {output.Candidate_loci_filtred_output}
+		#Need to add a code within Filter_loci_with_NR.py in order to create a /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_filtred.aa file
 	""" 
 
 
