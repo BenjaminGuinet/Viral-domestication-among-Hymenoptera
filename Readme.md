@@ -40,9 +40,9 @@ Important files created :
 
 Mmseqs2 query = genome ; db : virus protein sequences
 
-* Snakemake rule: **Homology_analysis**
+* Snakemake rule: **Snakemake_homologous_analysis**
 
-* Script used : ***Mmseqs2 search***
+* Script used : ***Mmseqs2 search & convertalis, Make_change_strand_mmseqs.py, Extract_loci.py, Translate_DNA_to_AA.py, Filter_loci_with_NR.py***
 
 Important files created : 
 
