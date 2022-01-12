@@ -1,0 +1,82 @@
+
+rule all:
+  input:
+       "/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu.m8"
+       "/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred.m8",
+       "/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned.m8"
+       
+
+
+#Run the clustering algorithm implemented in Mmseqs2  between Hymenoptera loci and viral sequences 
+rule Clustering:
+    params:
+      threads="40",
+      time="00:40:00",
+      name="Reciprocal_mmseqs2_{species_names}",
+      out="/beegfs/data/bguinet/these/Results/Clustering_job.out",
+      err="/beegfs/data/bguinet/these/Results/Clustering_job.error"
+
+    input: 
+      database_fasta= "/beegfs/data/bguinet/these/Results/Candidate_viral_loci_and_viral_protein.aa"
+    output :
+       Clustering_output= "/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu.m8",
+       Clustering_output_filtred="/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filted.m8"
+
+    shell:
+      """
+      #Note: We use the following parameters: 
+      #--cluster-mode 1 : Connected component clustering that uses the transitive connection to cover more distant homologs.
+      #--cov-mode 0 : Bidirectional coverage, where only sequences with overlapping sequence lengths greater than 30% of the longer of the two sequences are clustered, 
+      #(in this case always the viral sequence since the loci are defined by viral hits). 
+      #-evalue 0.0001 : To eliminate false positives. 
+      # --cluster-reassign : During the cascade clustering of Mmseqs2, as the representative of a cluster can change at each iteration, 
+      #it can happen that some members that were already close to a cluster do not fulfill the clustering criteria anymore. We therefore correct this by reassigning 
+      #these sequences.
+
+      {mmseqs2} createdb {input.database_fasta} /beegfs/data/bguinet/these/Results/Candidate_viral_loci_and_viral_protein_db
+
+      {mmseqs2} cluster /beegfs/data/bguinet/these/Results/Candidate_viral_loci_and_viral_protein_db /beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu /beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_tm --threads 30 -s 7.5 --cluster-mode 1 --cov-mode 0 -c 0.30 -e 0.001
+
+      {mmseqs2} createtsv /beegfs/data/bguinet/these/Results/Candidate_viral_loci_and_viral_protein_db  /beegfs/data/bguinet/these/Results/Candidate_viral_loci_and_viral_protein_db /beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu /beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu.tsv
+
+      python3 /beegfs/home/bguinet/these_scripts_2/MMseqs2_clust_to_tab.py -f /beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu.tsv -o {output.Clustering_output}
+
+      #Now let's filter the clusters (remove orphelins clusters (without any Hymenopteras loci) and cluster with more then 50 species within )
+      python3 /beegfs/home/bguinet/these_scripts_2/Filter_clusters.py -c {output.Clustering_output} -o {output.Clustering_output_filtred}
+      
+      #Nb cluster : 978
+      """
+
+#We will now get the alignment informations of the clusters by taking these informations from the relaxed blast done on all candidate loci (evalue <=1):
+rule Add_alignment_informations_to_cluster:
+       params:
+        threads="30",
+        time="10:00:00",
+        name="Fasta_candidate_loci_viral_protein_relaxed",
+        out="/beegfs/data/bguinet/these/Results/Fasta_candidate_loci_viral_protein_relaxed.out",
+        err="/beegfs/data/bguinet/these/Results/Fasta_candidate_loci_viral_protein_relaxed.error"
+       input:
+         Fasta_candidate_loci="/beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_filtred.aa",
+         Fasta_viral_protein="/beegfs/data/bguinet/these/Results/Viral_protein_nodup.aa",
+         Cluster_table="/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filted.m8"
+       output:
+           out1="/beegfs/data/bguinet/these/Results/Fasta_candidate_loci_viral_protein_relaxed.m8",
+           out2= "/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned.m8"
+       shell:
+           """
+           PYTHONPATH='/beegfs/home/bguinet/.local/lib/'
+
+           {mmseqs2} createdb {input.Fasta_viral_protein} /beegfs/data/bguinet/these/Results/Viral_protein_nodup_db
+	   
+           {mmseqs2} createdb {input.Fasta_candidate_loci} /beegfs/data/bguinet/these/Results/Fasta_candidate_loci_db
+
+           {mmseqs2} search /beegfs/data/bguinet/these/Results/Fasta_candidate_loci_db /beegfs/data/bguinet/these/Results/Viral_protein_nodup_db /beegfs/data/bguinet/these/Results/Fasta_candidate_loci_viral_protein_relaxed /beegfs/data/bguinet/these/Results/tmp_mmsesq_relaxed -e 1 --threads 30 -s 7.5
+
+           {mmseqs2} convertalis --format-output query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen,tcov /beegfs/data/bguinet/these/Results/Fasta_candidate_loci_db /beegfs/data/bguinet/these/Results/Viral_protein_nodup_db /beegfs/data/bguinet/these/Results/Fasta_candidate_loci_viral_protein_relaxed {output.out1}
+
+           python3 /beegfs/home/bguinet/these_scripts_2/Add_alignment_informations_to_cluster.py -c {input.Cluster_table} -r {output.out1} -o {output.out2}
+          
+	         #Nb remaining clusters : 978 / 985
+           #Nb remaining queries : 7024 / 7113
+           #Nb remaining viral seq : 26690 / 58358
+	         """
