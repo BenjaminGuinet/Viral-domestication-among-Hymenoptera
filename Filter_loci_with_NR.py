@@ -11,16 +11,29 @@ print('-------------------------------------------------------------------------
 
 #----------------------------------- PARSE SOME ARGUMENTS ----------------------------------------
 parser = argparse.ArgumentParser(description='Allow add taxonomy informationsa blast file')
-parser.add_argument("-l", "--blast_file", help="The blast file in .m8 format")
 parser.add_argument("-o", "--out_file", help="The name of the output filtred file")
 parser.add_argument("-Nr", "Nr_results", help="The Nr table result file")
 args = parser.parse_args()
 
-#Usage example Filter_loci_with_NR.py -b /beegfs/data/bguinet/these/Results/Candidate_viral_loci.m8 -Nr /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr.m8 -o /beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred.m8
+#Usage example Filter_loci_with_NR.py -Nr /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr.m8 -o /beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred.m8
 Blast_file= args.loci_file
 out_file=args.out_file
 
-blast = pd.read_csv(Blast_file,";")
+
+#Gather all blast result together 
+Species_name_file= "/beegfs/data/bguinet/these/Species_genome_names.txt" #each line correspond to the species name 
+
+list_of_names=[]
+for names in open(Species_name_file,"r"):
+        list_of_names.append(names.replace("\n", ""))
+#
+
+ALLblast= pd.DataFrame(columns=['query','target','pident','alnlen','mismatch','gapopen','qstart','qend','qlen','tstart','tend','tlen','evalue','bits','strand','Newqstart',	'Newqend'])
+
+for sp in list_of_names:
+  blast=pd.read_csv("/beegfs/data/bguinet/these/Genomes/"+sp+"/run_mmseqs2/result_mmseqs2_strand_summary_V.m8",sep=";")
+  ALLblast=ALLblast.append(blast)
+  
 
 tab_Nr= pd.read_csv("/beegfs/data/bguinet/these/Clustering4/Candidate_loci_filtred_end_reciprocal_result_filtred_taxid.m8",sep=";")
 
@@ -71,5 +84,3 @@ tab_Nr= tab_Nr.drop_duplicates(subset = 'query', keep = 'first')
 blast =blast.loc[~blast['query'].isin(tab_Nr['query'])]
 
 blast.to_csv(output_file,sep=";",indexe=false)
-
-
