@@ -59,3 +59,128 @@ As a result, we will have a number of viral sequences with homology to certain l
 
 
 
+#### 1) Adding strands and changing the direction of the coordinates in the file result_mmseqs2.m8
+
+![Image description](mmseqs2_output_step)
+
+
+#### 2) For refseq mmseqs2 table
+```
+cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do python3 Make_change_strand_mmseqs2.py -b /beegfs/data/bguinet/these/Genomes/${line}/run_mmseqs2_V/result_mmseqs2.m8 -o /beegfs/data/bguinet/these/Genomes/${line}/run_mmseqs2_V -t virus; done
+```
+
+#### 3) For BUSCO tblastn tab (because busco already did a tblastn research, we will take it from the source)
+```
+To delete >  cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do python3 Make_change_strand_mmseqs2.py -b /beegfs/data/bguinet/these/Genomes/${line}/run_busco/run_BUSCO_v3/blast_output/tblastn_${line}_BUSCO_v3.tsv -o /beegfs/data/bguinet/these/Genomes/${line}/run_busco/run_BUSCO_v3/blast_output/ -t hymenoptera; done
+
+
+to keep 
+import pandas as pd 
+
+list_of_names1=[]
+for names in open("/beegfs/data/bguinet/these/Genomes/Species_genome_names_test.txt","r"):
+	list_of_names1.append(names)
+
+list_of_names2=[]
+
+for names in list_of_names1:
+	list_of_names2.append(names.replace("\n", ""))
+  
+for sp_name in list_of_names2:
+  print(sp_name)
+  df1 = pd.read_csv("/beegfs/data/bguinet/these/Genomes/"+sp_name+"/run_busco/run_BUSCO_v3/full_table_"+sp_name+"_BUSCO_v3.tsv",comment='#',sep="\t")
+  df1['Strand']='NA'
+  row=0
+  for Busco_id, Contig in zip (df1['Busco_id'],df1['Contig']):
+    if df1.at[row,'Status']=="Missing":
+      row+=1
+      continue
+    else:
+      try: 
+        df2 = pd.read_csv("/beegfs/data/bguinet/these/Genomes/"+sp_name+"/run_busco/run_BUSCO_v3/augustus_output/predicted_genes/"+Busco_id+".out.1",comment='#',sep="\t",header=None)
+      except: 
+        try:
+            df2 = pd.read_csv("/beegfs/data/bguinet/these/Genomes/"+sp_name+"/run_busco/run_BUSCO_v3/augustus_output/predicted_genes/"+Busco_id+".out.2",comment='#',sep="\t",header=None)
+        except:
+            df2 = pd.read_csv("/beegfs/data/bguinet/these/Genomes/"+sp_name+"/run_busco/run_BUSCO_v3/augustus_output/predicted_genes/"+Busco_id+".out.3",comment='#',sep="\t",header=None)
+      Strand=df2[6][0]
+      df1.at[row, 'Strand'] = Strand
+      row+=1
+      print(row," / ",len(df1['Busco_id']))
+  df1.to_csv("/beegfs/data/bguinet/these/Genomes/"+sp_name+"/run_busco/run_BUSCO_v3/full_table_"+sp_name+"_BUSCO_v3_strand.tsv",header=True,sep="\t")
+    
+    
+    
+    
+```
+
+Generate a file : **result_mmseqs2_strand_V.m8** de type :
+```
+"query", "tlen", "target", "pident", "alnlen", "mismatch", "gapopen","qstart", "qend", "tstart", "tend", "evalue", "bits", "strand"
+```
+
+![Image description](Overlapping_step.png)
+
+#### 4) Switch to R, in order to launch R on the server use */beegfs/data/soft/R-3.5.2/bin/R
+```
+/beegfs/data/soft/R-3.5.2/bin/Rscript Overlapping_sequences_BUSCO_Viral_loci.R /beegfs/data/bguinet/these/Species_genome_names.txt /beegfs/data/bguinet/these/Genomes/ #Permet d'executer le fichier . R
+```
+
+Creation of :
+
+**Matches_Apis_mellifera_strand_V.m8** : un fichier avec les brains d'affichés ainsi que les coordonnées changées de sens
+**Matches_",i,"_summary_V.txt** : a file of type "seqnames" "start" "end" "width" "strand" "type" in which the HSPs are grouped together and have a new coordinate.
+
+
+
+Recovery of all loci according to their coordinates in the genomes of each species in a single file. **All_fasta_viral_loci.fna**
+
+![Image description](All_non_overlapping_candidate_step.png)
+
+```
+bash Recover_loci_sequences2.sh /beegfs/data/bguinet/these/Genomes/ /beegfs/home/bguinet/these_scripts_2/ /beegfs/data/bguinet/these/Species_genome_names.txt
+```
+
+### Filtering of loci using NR database. 
+
+We will remove loci matching with Bacterial of Insects protein sequences fellowing some criterias.
+
+
+
+* Snakemake rule: **Reciprocal_mmseqs2_search**
+
+* Script used : ***mmsesq createdb, search, convertalis***
+
+Important file created :  **/beegfs/data/bguinet/these/Genomes/{species_names}/run_mmseqs2_V/Mmseqs_reciprocal_result.m8** (used in Filter candidate)
+
+
+## Gene clustering analysis 
+
+We will perform clustering with the idea of gathering candidate loci and viral proteins in the same clusters by sequence homologies. 
+For this we proceed to 5 steps, the main part of the pipeline code is written in the file **Snakefile_clustering_analysis**. 
+
+### Extract matching loci and create fasta file
+```mkdir /beegfs/data/bguinet/these/Clustering3```
+
+- So first we will translate all Viral_loci into protein
+
+```
+python3 Translate_DNA_to_AA.py -f /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.fna -o /beegfs/data/bguinet/these/Viral_sequences_loci/
+```
+
+- Then we will concatenate the queries loci with the proteins from the target (virus proteins database)
+
+```
+cat /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_filtred.aa /beegfs/data/bguinet/these/NCBI_protein_viruses/All_viral_protein_sequences_without_contamination_controls.fa > /beegfs/data/bguinet/these/Clustering3/Candidate_viral_loci_and_viral_protein.aa
+```
+
+* Snakemake rule: **Extract_matching_loci**
+
+* Script used : **Extract_matching_loci.py, Translate_DNA_to_AA.py**
+
+Important file created : 
+- **Mmseqs_reciprocal_db.aa** : contains all proteoms of 20 insects (without Hymenoptera) and 5 Bacterias
+- **Mmseqs_reciprocal_loci_query.aa** : contains all candidate loci 
+(both used in Reciprocal analysis)
+
+--------
