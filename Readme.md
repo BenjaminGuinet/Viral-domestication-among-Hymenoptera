@@ -184,6 +184,8 @@ Note: We use the following parameters:
 * Script used : ***Mmseqs2 cluster***
 
 Important file created  : 
-- **/beegfs/data/bguinet/these/Clustering3/Candidate_viral_loci_and_viral_protein_clu.tab** (Clustering table)
-- **/beegfs/data/bguinet/these/Clustering3/Filtred_Candidate_viral_loci_and_viral_protein_clu.tab** (Filtred clustering table without orphelin clusters or with cluster with > 50 different Hymenoptera species)
+- **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu.m8"** (Clustering table)
+- **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred.m8** Filtred clustering table without orphelin clusters or with cluster with > 50 different Hymenoptera species)
+- **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned.m8** (Filtrer Clustering table with alignment informations)
+
 --------
