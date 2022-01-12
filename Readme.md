@@ -19,7 +19,7 @@ Therefore, we chose to eliminate these proteins from the dataset to avoid false 
 --------
 
 ## Search for BUSCO genes for each genome.
-# This BUSCO step is important in mulitple following processes (check assembly quality, build a species phylogeny and build mutliple normal distributions such as 
+ This BUSCO step is important in multiple following processes (check assembly quality, build a species phylogeny and build mutliple normal distributions such as 
 the expected coverage or G+C% distrubtion along the genomes.
 
 * Snakemake rule: **Busco_analysis**
