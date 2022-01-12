@@ -146,41 +146,44 @@ bash Recover_loci_sequences2.sh /beegfs/data/bguinet/these/Genomes/ /beegfs/home
 We will remove loci matching with Bacterial of Insects protein sequences fellowing some criterias.
 
 
+* Snakemake file : **Homologous_snakemake**
+* Snakemake rule: **Filter_loci**
 
-* Snakemake rule: **Reciprocal_mmseqs2_search**
+* Script used : ***mmsesq createdb, search, convertalis,Filter_loci_with_NR.py***
 
-* Script used : ***mmsesq createdb, search, convertalis***
-
-Important file created :  **/beegfs/data/bguinet/these/Genomes/{species_names}/run_mmseqs2_V/Mmseqs_reciprocal_result.m8** (used in Filter candidate)
+Important file created :  **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred.m8** (used in Filter candidate)
 
 
 ## Gene clustering analysis 
 
-We will perform clustering with the idea of gathering candidate loci and viral proteins in the same clusters by sequence homologies. 
+We will perform now clustering with the idea of gathering candidate loci and viral proteins in the same clusters by sequence homologies. 
 For this we proceed to 5 steps, the main part of the pipeline code is written in the file **Snakefile_clustering_analysis**. 
 
-### Extract matching loci and create fasta file
-```mkdir /beegfs/data/bguinet/these/Clustering3```
+### Create fasta files with virus and filtred loci to feed the clustering method 
 
-- So first we will translate all Viral_loci into protein
-
-```
-python3 Translate_DNA_to_AA.py -f /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.fna -o /beegfs/data/bguinet/these/Viral_sequences_loci/
-```
-
-- Then we will concatenate the queries loci with the proteins from the target (virus proteins database)
+- We will concatenate the filtred queries loci with the proteins from the target (virus proteins database)
 
 ```
-cat /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_filtred.aa /beegfs/data/bguinet/these/NCBI_protein_viruses/All_viral_protein_sequences_without_contamination_controls.fa > /beegfs/data/bguinet/these/Clustering3/Candidate_viral_loci_and_viral_protein.aa
+cat /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_filtred.aa /beegfs/data/bguinet/these/NCBI_protein_viruses/All_viral_protein_sequences_without_contamination_controls.fa >> /beegfs/data/bguinet/these/Results/Candidate_viral_loci_and_viral_protein.aa
 ```
 
-* Snakemake rule: **Extract_matching_loci**
+### Connected component Clustering
 
-* Script used : **Extract_matching_loci.py, Translate_DNA_to_AA.py**
+Note: We use the following parameters: 
+      #--cluster-mode 1 : Connected component clustering that uses the transitive connection to cover more distant homologs.
+      #--cov-mode 0 : Bidirectional coverage, where only sequences with overlapping sequence lengths greater than 30% of the longer of the two sequences are clustered, 
+      #(in this case always the viral sequence since the loci are defined by viral hits). 
+      #-evalue 0.0001 : To eliminate false positives. 
+      # --cluster-reassign : During the cascade clustering of Mmseqs2, as the representative of a cluster can change at each iteration, 
+      #it can happen that some members that were already close to a cluster do not fulfill the clustering criteria anymore. We therefore correct this by reassigning 
+      #these sequences
 
-Important file created : 
-- **Mmseqs_reciprocal_db.aa** : contains all proteoms of 20 insects (without Hymenoptera) and 5 Bacterias
-- **Mmseqs_reciprocal_loci_query.aa** : contains all candidate loci 
-(both used in Reciprocal analysis)
+* Snakemake file: **/Snakefile_Clustering_analysis**
+* Snakemake rule: **Clustering**
 
+* Script used : ***Mmseqs2 cluster***
+
+Important file created  : 
+- **/beegfs/data/bguinet/these/Clustering3/Candidate_viral_loci_and_viral_protein_clu.tab** (Clustering table)
+- **/beegfs/data/bguinet/these/Clustering3/Filtred_Candidate_viral_loci_and_viral_protein_clu.tab** (Filtred clustering table without orphelin clusters or with cluster with > 50 different Hymenoptera species)
 --------
