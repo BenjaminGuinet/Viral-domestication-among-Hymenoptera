@@ -1,0 +1,115 @@
+###Snake file
+#Note : This SnakeFile allows to conduct a sequence homology analysis in which eukaryotic genomes (here Hymenoptera) are the queries and the database is all viral proteins. 
+# Each viral hit overlap is then used to define candidate loci for viral endogenization.
+
+import pandas as pd
+import re 
+import os
+
+#Programs
+
+mmseqs2="/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs" #(version 5daca424b162cc5fdf0b9cd151aebed86975cbf6)
+
+#Load species names
+Species_name_file="/beegfs/data/bguinet/these/Species_genome_names_test.txt"
+list_of_names1=[]
+for names in open(Species_name_file,"r"):
+ 	list_of_names1.append(names)
+
+list_of_names2=[]
+for names in list_of_names1:
+ 	list_of_names2.append(names.replace("\n", ""))
+
+SAMPLES=[]
+for i in list_of_names2:
+	SAMPLES.append(i)
+
+rule all:
+  input:
+       expand("/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.fna", names = SAMPLES),
+       expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2_strand_V.m8", names = SAMPLES),
+       expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2_strand_summary_V.m8", names = SAMPLES),
+       expand("/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.faa",names = SAMPLES)
+       # expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/.tab", names = SAMPLES),
+       # expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8", names = SAMPLES),
+       # expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2_V/result_mmseqs2_strand_V.m8", names = SAMPLES),
+       # expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2_V/result_mmseqs2_summary_V.m8", names = SAMPLES)
+
+#First create the viral db :
+#{mmseqs2} createdb {input.Viraldb} /beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db
+rule Homology_analysis:
+    input:
+      Viraldb="/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db",
+      Genomedb="/beegfs/data/bguinet/these/Genomes/{names}/{names}_corrected.fa"
+    output:
+        out= "/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8",
+        
+    shell:
+        """
+        PYTHONPATH="/beegfs/home/bguinet/.local/lib/"
+        
+        mkdir /beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/
+        
+        {mmseqs2} createdb {input.Genomedb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db
+                        
+        {mmseqs2} search /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db {input.Viraldb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/tpm -a -s 7.5 -e 0.01 --threads 10
+        
+	      rm -r /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/tpm #Since Tpm file are heavy 
+	
+        {mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qaln'  /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/{wildcards.names}_mmseqs2_db {input.Viraldb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2.m8
+
+        """
+
+#Define_loci
+#Note:  here we correct by the fact that we used MEC analysis wich changed the scaffolds names, if you do not have this issu please use -correct_scaf_name no arg in the 
+rule Define_loci:
+    input:
+        Blast_tab="/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8"
+    output:
+        out1= "/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2_strand_V.m8",
+        out2= "/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2_strand_summary_V.m8"
+	
+    threads: 1
+    shell:
+        """
+        PYTHONPATH="/beegfs/home/bguinet/.local/lib/"
+        python3 /beegfs/home/bguinet/these_scripts_2/Make_change_strand_mmseqs2.py -b {input.Blast_tab} -o {output.out1} -t virus
+	/beegfs/data/soft/R-3.5.2/bin/Rscript /beegfs/home/bguinet/these_scripts_2/Overlapping_sequences_BUSCO_Viral_loci2.R {output.out1} {output.out2}
+        """
+
+             
+#rule Extract_loci: 
+#Need to be simplified since query aln is now present within the table 
+rule Extract_loci:
+    threads: 1
+    log: 
+         "/beegfs/data/bguinet/these/{names}_log_extract.txt"
+    input: 
+         Summary_file="/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2_strand_summary_V.m8"
+    output: 
+         Loci_dna_output="/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.fna"
+    shell:
+         """
+         python3 /beegfs/home/bguinet/these_scripts_2/Extract_loci.py -s {wildcards.names} -l {input.Summary_file} -b /beegfs/data/bguinet/these/Genomes/{wildcards.names}/Fasta_viral_loci.bed -o {output.Loci_dna_output}  >& {log}
+         #Add species name into the loci names 
+	 sed -i 's@)@):{wildcards.names}@g' {output.Loci_dna_output} 
+	 """
+        
+rule Translate_loci:
+    threads: 1
+    input:
+        Loci_dna="/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.fna"
+    output:
+        Loci_aa="/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.faa"
+    shell:
+         """
+         python3 /beegfs/home/bguinet/these_scripts_2/Translate_DNA_to_AA.py -f {input.Loci_dna} -o {output.Loci_aa}
+         """
+
+#Put all Fasta sequence into one unique file : 
+#cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci_seq_${line}.fa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.fna ; done 
+#cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci_seq_${line}.aa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.aa ; done 
+
+#Swith to clustering directory
+#cat /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.aa /beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup.aa >> /beegfs/data/bguinet/these/Clustering3/Candidate_viral_loci_and_viral_protein.aa
+
