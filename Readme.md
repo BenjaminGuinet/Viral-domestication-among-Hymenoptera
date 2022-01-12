@@ -42,7 +42,7 @@ Mmseqs2 query = genome ; db : virus protein sequences
 
 * Snakemake rule: **Snakemake_homologous_analysis**
 
-* Script used : ***Mmseqs2 search & convertalis, Make_change_strand_mmseqs.py, Extract_loci.py, Translate_DNA_to_AA.py, Filter_loci_with_NR.py***
+* Script used : ***Mmseqs2 search & convertalis***
 
 Important files created : 
 
