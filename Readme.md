@@ -190,7 +190,14 @@ Important file created  :
 
 --------
 
+We can now run several analysis on loci : 
 
+- Ontology analysis (what are the ontology of the candidate EVEs?)
+- Family analysis (what are the families of the candidate EVES?)
+- Repeat element analysis (do we find TEs in the same scaffolds as EVEs?)
+- Eukaryotic gene analysis (do we find eukaryotic genes in the same scaffolds as EVEs?)
+- Coverage and G+C% analysis (is the coverage and G+C% of a scaffold containing EVEs the same compared as scaffols containing BUSCO?)
+-
 ###########################
 
 ## Candidate Gene informations
