@@ -73,7 +73,7 @@ rule Define_loci:
     shell:
         """
         PYTHONPATH="/beegfs/home/bguinet/.local/lib/"
-        python3 /beegfs/home/bguinet/these_scripts_2/Make_change_strand_mmseqs2.py -b {input.Blast_tab} -o {output.out1} -t virus
+        python3 /beegfs/home/bguinet/these_scripts_2/Make_change_strand_mmseqs.py -b {input.Blast_tab} -o {output.out1} -t virus
 	/beegfs/data/soft/R-3.5.2/bin/Rscript /beegfs/home/bguinet/these_scripts_2/Overlapping_sequences_BUSCO_Viral_loci2.R {output.out1} {output.out2}
         """
 
@@ -116,13 +116,13 @@ rule Filter_loci:
 
 	shell:
 	"""
-	#Put all Fasta sequence into one unique file :
-	cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci_seq_${line}.fa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.fna ; done 
-	cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci_seq_${line}.aa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.aa ; done 
-	{mmseqs2} createdb {Candidate_loci} /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db
-	{mmseqs2} search /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db {input.Nr_db}  /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr_tpm 
-	{mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tcov' /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db /beegfs/data/bguinet/these/NR_db /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr {output.Candidate_loci_Nr_output} -s 7 --threads 20
-	python3 Filter_loci_with_NR.py  -Nr {output.Candidate_loci_Nr_output} -o {output.Candidate_loci_filtred_output}
+		#Put all Fasta sequence into one unique file :
+		cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci_seq_${line}.fa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.fna ; done 
+		cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci_seq_${line}.aa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.aa ; done 
+		{mmseqs2} createdb {Candidate_loci} /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db
+		{mmseqs2} search /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db {input.Nr_db}  /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr_tpm 
+		{mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tcov' /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db /beegfs/data/bguinet/these/NR_db /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr {output.Candidate_loci_Nr_output} -s 7 --threads 20
+		python3 Filter_loci_with_NR.py  -Nr {output.Candidate_loci_Nr_output} -o {output.Candidate_loci_filtred_output}
 	""" 
 
 
