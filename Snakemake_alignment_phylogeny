@@ -1,0 +1,150 @@
+
+##Phylogeny and alignment 
+
+#Here is the structure of the folders, please create these directory before running the analysis:
+
+#  ./Cluster_alignment_phylo
+#          ./Cluster_seqs     (all .aa and .dna cluster files)
+#          ./Cluster_alignment  (all .aa Clustal alignments)
+#          ./Codon_alignment_clusters (all _NT.dna and _AA.dna MACSE codon alignments)
+#
+#  ./Cluster_phylogeny ( all _AA.dna.treefile Iqtree phylogenies)
+#          
+
+##Phylogeny and alignment 
+
+#Load all clusternames 
+
+import os
+import re 
+SAMPLES=[]
+for file in os.listdir("/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/"):
+    if file.endswith(".aa"):
+      Clustername=re.sub(".aa","",file)
+      SAMPLES.append(Clustername)
+rule all:
+  input:
+        #expand("/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_alignment_phylo/{cluster_number}.aa.aln", cluster_number = SAMPLES),
+        expand("/beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/{cluster_number}_AA.dna", cluster_number = SAMPLES3)
+        #expand("/beegfs/data/bguinet/these/Cluster_phylogeny/{cluster_number2}_AA.dna.treefile", cluster_number2 = SAMPLES2) 
+
+
+#Download nucleotide fasta equivalent of the viral hists 
+#nohup python3 /beegfs/home/bguinet/these_scripts_2/Prot_to_nucl_fasta.py -b /beegfs/data/bguinet/these/Results/Viralprot_vs_Viral_loci_result_all_match_and_cluster.m8  -o /beegfs/data/bguinet/these/Results/Virus_candidate_sequences.dna 
+
+#Load all fna loci sequences
+#cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci_filtred.fna >> Candidate_loci_filtred.dna; done
+
+#Assembly of the clustered sequences in a common file
+#For the MACSE codon alignment, we will need to get the clusters into DNA and AA form for both viral and candidate loci sequences 
+rule Create_cluster_files:
+    input:
+      Blast_table="/beegfs/data/bguinet/these/Results/Viralprot_vs_Viral_loci_result_all_match_and_cluster.m8",
+      Viral_protein="/beegfs/data/bguinet/these/Results/Viral_protein_nodup.aa",
+      Viral_nucleotide="/beegfs/data/bguinet/these/Results/Virus_candidate_sequences.dna",
+      Candidate_loci_protein="/beegfs/data/bguinet/these/Results/Candidate_loci_filtred.aa",
+      Candidate_loci_nucleotide="/beegfs/data/bguinet/these/Results/Candidate_loci_filtred.dna"
+    shell:
+      """
+      python3 /beegfs/home/bguinet/these_scripts_2/Get_loci_and_seq_for_phylo.py -b {input.Blast_table} -o /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/ -aaV {input.Viral_protein} -dnaV {input.Viral_nucleotide} -aaL {input.Candidate_loci_protein} -dnaL {input.Candidate_loci_nucleotide}
+      """
+    
+#Align all sequences 
+rule Omega_cluster_alignment:
+    params:
+      threads="7",
+      time="22:00:00",
+      name="Alignment_{cluster_number}",
+      out="/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_alignment_phylo/Logs/ClustalO_run_{cluster_number}.out",
+      err="/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_alignment_phylo/Logs/ClustalO_run_{cluster_number}.error"
+    input:
+      Cluster_file="/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/{cluster_number}.aa"
+    output: 
+      Alignment_cluster_file="/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_alignment_phylo/{cluster_number}.aa.aln"
+    shell:
+      """
+      /beegfs/data/bguinet/TOOLS/clustalo -v -i {input.Cluster_file} --out {output.Alignment_cluster_file} --threads 7 
+      """
+
+#Run HSP analysis 
+#Because HSP need to be merged
+#Find HSP 
+rule Merge_Hsp_analysis:
+    shell:
+      """
+      python3 /beegfs/home/bguinet/these_scripts_2/Merge_HSP_sequences_within_clusters2.py -d /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_alignment_phylo/ -e .aa.aln
+      #Rename files :
+      for file in /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_alignment_phylo/Cluster*.aa.aln_Hsp; do
+      DEST=$(echo $file | sed 's/_Hsp//') ; 
+      echo "rm $DEST" ;#Remove the old file name
+      echo "mv $file $DEST" #Rename the HSP file to the new one  
+
+      for file in /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_alignment_phylo/*.aa.aln_Hsp_dna; do
+      DEST=$(echo $file | sed 's/aa.aln_Hsp_//')
+      DEST=$(basename $DEST)
+      echo rm /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/${DEST}
+      echo cp $file /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/
+      file2=$(basename $file)
+      echo mv /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/$file2 /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/${DEST}
+      """
+
+#Run MACSE analysis 
+rule MACSE_cluster_alignment:
+  params:
+     threads="1",
+     time="62:00:00",
+     name="Codon_alignment_{cluster_number}",
+     out="/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_alignment_phylo/Logs/MACSE_run_{cluster_number}.out",
+     err="/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_alignment_phylo/Logs/MACSE_run_{cluster_number}.error"
+  input:
+     Cluster_file="/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/{cluster_number}.dna"
+  output: 
+     Alignment_cluster_file="/beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/{cluster_number}_AA.dna"
+  shell:
+     """
+     hostname
+     #export JAVA_HOME=/usr/local/jre1.8.0_202/
+     #export PATH=/usr/local/jre1.8.0_202/bin:$PATH
+     cd /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/
+     #DEST=$(basename {input.Cluster_file})
+     java -jar /beegfs/data/bguinet/TOOLS/macse_v2.05.jar -prog alignSequences -seq {input.Cluster_file} 
+     #DEST_NT=$(echo $DEST | sed 's/.dna/_NT.dna/')
+     #DEST_AA=$(echo $DEST | sed 's/.dna/_AA.dna/')
+     #mv /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/$DEST_NT /beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/
+     #mv /beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/$DEST_AA /beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/
+     """
+
+rule Clean_codon_alignment:
+     """
+       for file in /beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/Cluster*_NT.dna; do cp $file ${file}_without_shift; done
+       for file in /beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/Cluster*_AA.dna; do cp $file ${file}_without_shift; done 
+       for file in /beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/Cluster*_NT.dna_without_shift; do sed -i 's@!@-@g' $file; done
+       for file in /beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/Cluster*_AA.dna_without_shift; do sed -i 's@!@-@g' $file; done
+       for file in /beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/Cluster*_NT.dna_without_shift; do /beegfs/data/bguinet/TOOLS/trimal/source/readal -in $file -out $file.unaligned -onlyseqs ; done
+       for file in /beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/Cluster*_NT.dna_without_shift; do DEST=$(echo $file | sed 's/_NT/_AA/'); DEST2=$(echo $file | sed 's/_without_shift/_without_shift_cleaned/');/beegfs/data/bguinet/TOOLS/trimal/source/trimal -backtrans $file.unaligned -in $DEST -automated1 -resoverlap 0.30 -seqoverlap 30 -fasta -ignorestopcodon -out $DEST2 ; done
+     """
+
+#Run IQTREE analysis 
+rule Cluster_phylogeny:
+  params:
+    threads="5",
+    time="48:00:00",
+    name="Cluster_phylogeny_{cluster_number2}",
+    out="/beegfs/data/bguinet/these/Cluster_phylogeny/Logs/IQTREE_run_{cluster_number2}.out",
+    err="/beegfs/data/bguinet/these/Cluster_phylogeny/Logs/IQTREE_run_{cluster_number2}.error"
+  input:
+    Cluster_alignment_file="/beegfs/data/bguinet/these/Cluster_alignment_phylo/Cluster_seqs/{cluster_number2}_AA.dna"
+  output:
+    Cluster_alignment_output="/beegfs/data/bguinet/these/Cluster_phylogeny/{cluster_number2}_AA.dna.treefile"
+  shell:
+    """
+    sed -i 's@!@-@g' {input.Cluster_alignment_file}
+    /beegfs/data/bguinet/TOOLS/iqtree-2.1.2-Linux/bin/iqtree2 -s {input.Cluster_alignment_file} -m TEST -alrt 1000  -nt 5 
+    #mv /beegfs/data/bguinet/these/Cluster_alignment_phylo/Codon_alignment_clusters/{wildcards.cluster_number2}_AA.dna.* /beegfs/data/bguinet/these/Cluster_phylogeny/
+    for file in /beegfs/data/bguinet/these/Cluster_phylogeny/Cluster*_AA.dna.treefile; do sed -i 's@____@_+__@g' $file; done
+    """
+#We will then need to save all treefile into a rooted format in order to get same phylogeny structures within the dN/dS analysis 
+
+for file in /beegfs/data/bguinet/these/Cluster_phylogeny_filtred/Cluster*_AA.dna.treefile; do echo seaview -reroot -outnewick $file - $file; done 
+
+
