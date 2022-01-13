@@ -1,0 +1,78 @@
+#Augustus
+
+
+Species_name_file="/beegfs/data/bguinet/these/Species_genome_names_without_outgroup.txt"
+list_of_names1=[]
+for names in open(Species_name_file,"r"):
+ 	list_of_names1.append(names)
+
+list_of_names2=[]
+for names in list_of_names1:
+ 	list_of_names2.append(names.replace("\n", ""))
+
+rule all:
+  input:
+        expand("/beegfs/data/bguinet/these/Genomes/{species_names}/run_augustus/run_augustus_new.out", species_names = list_of_names2),
+       # "/beegfs/data/bguinet/these/Repeat_env_analysis/All_scaffold_repeat_search_result_dna_strand_V_reduced.m8"
+
+
+rule Extract_scaffolds:
+	shell:
+         """
+         mkdir /beegfs/data/bguinet/these/Genomes/{wildcards.species_names}/run_augustus
+         python3  Extract_candidat_scaffolds.py
+         """
+
+rule Augustus_analysis:
+        params:
+              threads="1",
+              mem="30G",
+              time="25:00:00",
+              name="Augustus_analysis_{species_names}",
+              out="/beegfs/data/bguinet/these/Genomes/{species_names}/run_augustus/Augustus_run.out",
+              err="/beegfs/data/bguinet/these/Genomes/{species_names}/run_augustus/Augustus_run.error"
+
+        input: 
+              Candidate_scaffolds="/beegfs/data/bguinet/these/Genomes/{species_names}/All_scaffold_containing_{species_names}_candidates.fna"
+
+        output:
+              Augustus_candidate_scaff="/beegfs/data/bguinet/these/Genomes/{species_names}/run_augustus/run_augustus_new.out"
+
+        shell:
+             """
+             We will use the BUSCO training to get better results on Augustus 
+             mkdir /beegfs/data/bguinet/Bguinet_conda/config/species/{wildcards.species_names}/
+             cp /beegfs/data/bguinet/these/Genomes/{wildcards.species_names}/run_busco/run_BUSCO_v3/augustus_output/retraining_parameters/* /beegfs/data/bguinet/Bguinet_conda/config/species/{wildcards.species_names}/
+             /beegfs/data/bguinet/Bguinet_conda/bin/rename 's/(?:BUSCO_|_BUSCO_v3_\d+)//g' /beegfs/data/bguinet/Bguinet_conda/config/species/{wildcards.species_names}/*BUSCO* 
+             cp /beegfs/data/bguinet/these/Genomes/{wildcards.species_names}/run_busco/run_BUSCO_v3/augustus_output/retraining_parameters/* /beegfs/data/bguinet/Bguinet_conda/config/species/{wildcards.species_names}/
+             #Run augustus 
+             /beegfs/data/bguinet/Bguinet_conda/bin/augustus --species={wildcards.species_names} --AUGUSTUS_CONFIG_PATH=/beegfs/data/bguinet/Bguinet_conda/config/ {input.Candidate_scaffolds} >> {output.Augustus_candidate_scaff} 
+             """
+
+#Assign taxonomy on augustus results using mmseqs taxonomy module on UniprotKb db 
+#Run MMSEQS augustus analysis 
+rule MMseqs_augustus:
+  params:
+    threads="20",
+    constraint='haswell|broadwell',
+    mem="10G"
+    time="48:00:00",
+    name="MMseqs_augustus_analysis",
+    out="/beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/MMseqs_augustus_analysis.out",
+    err="/beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/MMseqs_augustus_analysis.error"
+  input:
+    Augustus_files="/beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/All_augstus_fasta.fa"
+  shell:
+    """
+    #First lets gather all augustus fasta sequences :
+    cat /beegfs/data/bguinet/these/Species_genome_names_without_outgroup.txt | while read line; do python3 /beegfs/home/bguinet/these_scripts_2/Extract_augustus_fasta.py -a /beegfs/data/bguinet/these/Genomes/${line}/run_augustus/run_augustus_new.out -o /beegfs/data/bguinet/these/Genomes/${line}/run_augustus/Augustus_protein_in_candidat_scaff.fa -s ${line}; done 
+    cat /beegfs/data/bguinet/these/Species_genome_names_without_outgroup.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/run_augustus/Augustus_protein_in_candidat_scaff.fa >> {input.Augustus_files}; done
+    sed -i "s@> g@>g@g" {input.Augustus_files}
+    #Let's run the uniprot assignment analysis 
+    /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs createdb {input.Augustus_files} /beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/All_augstus_fasta_db
+    /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs taxonomy /beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/All_augstus_fasta_db /beegfs/data/bguinet/TOOLS/UniProtKB /beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/Augustus_Uniprot_tax_result tmp_taxa_result --threads 20 --lca-mode 2 --lca-ranks genus,family,order,superkingdom,kingdom
+    /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs createtsv /beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/Augustus_genes_db /beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/Augustus_Uniprot_tax_result /beegfs/data/bguinet/these/Augustus_search_analysis/Augustus_Uniprot_tax_result.tsv
+    awk 'p!=$1{c=5; p=$1} c&&c--' /beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/Augustus_Uniprot_tax_result_nr2.m8 >> /beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/Augustus_Uniprot_tax_result_nr2_sub.m8
+    python3 Add_augustus_to_blast.py -s /beegfs/data/bguinet/these/Species_genome_names_without_outgroup.txt -b {input.Blast_file} -r {input.Repeat_reduced_file} -o {output.Augustus_Repeat_with_blast_file} -a /beegfs/data/bguinet/these/Genomes/Augustus_search_analysis/Augustus_Uniprot_tax_result_nr2_sub.m8
+    """
+
