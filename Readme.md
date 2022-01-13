@@ -394,16 +394,18 @@ Column added :
 - count_eucaryote
 ______________________
 
-## Repeat elements in scaffolds (Depracted, I now used the Repeatpreps db) 
+## Repeat elements in scaffolds
 
 Since few sequenced viral genomes have ETs, or rarely more than one, then the probability that a viral gene flanked by an ET (which would have jumped into the viral genome beforehand) will integrate into the host genome is low. (Gilbert et al 2017). It is thought that this is because the majority of ET integrations in viral genomes are deleterious and are therefore eliminated by negative selection.  This is even lower if 2 ETs are found in the flanks of the EVEs and/or if it can be shown that the ET(s) present in the flanks are present elsewhere in the host genome.
 
 * Snakemake file : **Snakefile_TE_analysis**
-* Snakemake rule : **Repeat_analysis*
+* Snakemake rules : **Extract_scaffolds, BlastX_repeat_analysis*
 
 * Script used : **Mmseqs2 search, Filter_TEs.py*
 
-Important file created : **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned_taxid_ontology_interproscan_augustus_repeat.m8** (All repeat hits within scaffols containing candidates)
+Important file created : 
+- **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned_taxid_ontology_interproscan_augustus_repeat.m8** (All repeat hits within scaffols containing candidates)
+- **/beegfs/data/bguinet/these/Repeat_env_analysis2/BlastX_BUSCO_and_EVEs_on_RepeatPeps_results_{sp_names}.tab** (the blast result for each species loci against RepeatPeps db). 
 
 Column added : 
 - count_repeat
