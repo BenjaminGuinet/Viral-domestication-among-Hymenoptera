@@ -10,7 +10,8 @@
 **NCBI viruses proteins database :** https://www.ncbi.nlm.nih.gov/labs/virus/vssi/#/virus?SeqType_s=Protein&VirusLineage_ss=Viruses,%20taxid:10239
 
 * The download involved 07/10/19 **1,471,031 viral sequences** in their protein forms.* *
-
+--------
+--------
 
 ### Purging of contaminating sequences
 
