@@ -227,7 +227,7 @@ pip install taxadb
 
 * Script used : **Add_taxid_info.py**
 
-Important file created : **/beegfs/data/bguinet/these/Clustering3/Viralprot_vs_Viral_loci_result_all_match_and_cluster_taxid.m8**
+Important file created : **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned_taxid.m8**
 
 Column added : 
 
@@ -267,7 +267,7 @@ The function of the candidats genes in wasps can be explored via the presence or
 
 * Script used : **Add_genomic_ontology.py**
 
-Important file created : **/beegfs/data/bguinet/these/Clustering3/Viralprot_vs_Viral_loci_result_all_match_and_cluster_taxid_ontology.m8**
+Important file created : **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned_taxid_ontology.m8**
 
 Column added : 
 
@@ -291,44 +291,22 @@ The number of viral protein is : xxx
 
 ------------
 
-### HMMER analysis on candidat loci - depracted, I now use Interproscan 
+### Interproscan analysis on candidat loci -
+
 
 Each candidate locus should, if of viral origin, return particular domains known to be present in free viruses when tested via HMMER. This analysis will thus allow us to (i) confirm the viral character of a candidate locus and (ii) study the presence or absence of known domains within the loci, telling us more about the putative function of this locus beyond a simple ontological assignment by taking over the one assigned to a homologous viral protein. 
 
-hmmscan scores a database of HMMs vs. a database of sequences. An HMM database is what needs to be processed by hmmpress.
 
-#### Prerequisites
-First we need to dowload the pfam db :
-
-```
-wget ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam30.0/Pfam-A.hmm
-```
-
-Then we create the hmmer profile db 
-
-```
-/beegfs/data/bguinet/TOOLS/hmmer-3.2.1/src/hmmpress Pfam-A.hmm
-```
-
-Generate a fasta file with all Candidate loci filtred and Split the loci into multiple file to accelerate the HMMprocess :
-```
-mkdir /beegfs/data/bguinet/these/Domain_analysis2/Splited_fasta_loci/
-cd /beegfs/data/bguinet/these/Domain_analysis2/Splited_fasta_loci/
-awk -v size=500 -v pre=prefix -v pad=5 '/^>/{n++;if(n%size==1){close(f);f=sprintf("%s.%0"pad"d",pre,n)}}{print>>f}' /beegfs/data/bguinet/these/Clustering3/Candidate_loci_filtred.aa 
-```
-
-* Snakemake Rules : **HMMER_analysis1, HMMER_analysis2**
+* Snakemake Rules : **Inteproscan_analysis**
 (we keep only domain best hits based on bic score and remove all hits with evalue < 0.0005 and cov > 0.35).
 
-* Script used : **Hmmscan,HmmPy.py*
+* Script used : **Inteproscan (from singulairty container), Add_interproscan_and_ontology.py*
 
-Important file created : **/beegfs/data/bguinet/these/Domain_analysis2/Splited_fasta_loci/Hmmscan_loci_analysis_parsed_{number}.tab**
-
-We will then use the taxonomic information for each candidate loci (when available) in the **Add_genomic_env.py** script. 
+Important file created : **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned_taxid_ontology_interproscan.m8**
 
 ------------------
 
-### Merge HMMER and 2LCA analysis
+### Merge HMMER and 2LCA analysis #Depracted 
 
 * Snakemake rule : **Merge_2LCA_HMMER_analysis**
 
@@ -409,8 +387,11 @@ Important file created : **/beegfs/data/bguinet/these/Genomes/{species_names}/ru
 * Script used : **Mmseqs2 search*
 
 
-Important file created : **/beegfs/data/bguinet/these/Augustus_search_analysis/Augustus_Uniprot_tax_result.tsv** (All Nr hits for each augustus predictions)
+Important file created : **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned_taxid_ontology_interproscan_augustus.m8** 
 
+Column added : 
+
+- count_eucaryote
 ______________________
 
 ## Repeat elements in scaffolds (Depracted, I now used the Repeatpreps db) 
@@ -422,30 +403,14 @@ Since few sequenced viral genomes have ETs, or rarely more than one, then the pr
 
 * Script used : **Mmseqs2 search*
 
-Important file created : **/beegfs/data/bguinet/these/Repeat_env_analysis/All_scaffold_repeat_search_result_dna_strand_V_reduced.m8** (All repeat hits within scaffols containing candidates)
-
-______________________
-
-## Merge Repeat and Augustus results
-
-We then merge Augustus and repeat results by counting the number of **Arthopoda/insecta** genes and **repeat elements** within scaffolds containing candidates: 
-
-* Snakemake file : **Snakefile_add_Augustus_repeat_analysis**
-* Snakemake rule : **Merge_augustus_repeat_file*
-
-* Script used : **Add_augustus_repeat_to_blast.py*
-
-Important file created : **/beegfs/data/bguinet/these/Clustering3/Viralprot_vs_Viral_loci_result_all_match_and_cluster_taxid_ontology_2LCA_HMMER_Augustus_Repeat.m8** (All eucaryotic and repeat count added into the file)
-columnnames : **count_eucaryote; count_repeat**
+Important file created : **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned_taxid_ontology_interproscan_augustus_repeat.m8** (All repeat hits within scaffols containing candidates)
 
 Column added : 
-
-- count_eucaryote
 - count_repeat
 
 _________________________
 
-### Scaffolds coverage and GC content 
+### Scaffolds coverage and GC content  (Before, you need to run hisat2 on all genomes to get coveregae depth)
 
 #First we will have to generate for each genome a chimeric sequence wich simply corresponds to one chimeric sequence composed of all the scaffold where have been found at least once a Busco sequence.
 
@@ -460,7 +425,7 @@ _________________________
 
 * Script used : **Get_busco_scaff.py ,Add_genomic_env_last.py**
 
-Important file created : **/Viralprot_vs_Viral_loci_result_all_match_and_cluster_taxid_ontology_2LCA_HMMER_Augustus_Repeat_env.m8**
+Important file created : **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned_taxid_ontology_interproscan_augustus_repeat_env.m8**
 
 Column added : 
 
@@ -480,3 +445,176 @@ The process took **54 minutes** for **26319 sequences.**
 
 The number of cluster is : 3972
 __________________________________
+
+
+# Evolutionary history of clusters
+
+![Image description](Evolutionary_history_of_clusters.png)
+
+## Summary 
+
+Studying the domestication of genes of viral origin by eukaryotic genomes implies an interest in the evolutionary history of their acquisition. At this stage we have clusters of homologous genes sharing a common evolutionary history. These clusters are composed of both genes of viral origin and loci present in eukaryotic genomes.
+
+When a domestication event of a viral gene takes place within a Eukaryotic genome, we expect that the phylogenetic reconstruction of this gene will show us a phylogenetic tree well characterized by horizontal gene transfer events from the viral genome(s) to the Eukaryotic genome(s). Such a tree should then be incongruous and show a viral phylogeny in which we observe the insertion of branches of eukaryotic origin. If this is the case, it suggests that these loci of viral origin have been integrated into the eukaryotic genomes (in this respect, we propose an approach to test the hypothesis that the gene is well integrated into the genome, and that it is not a natural or laboratory contaminant - see [Integration-assessment](#).
+
+In order to reconstruct the phylogenetic history of our clusters and since they are sequences with a relatively long divergence time, we will use amino acid alignments (amino acids being more conserved over long periods of time). Amino acid alignment is performed with the ```ClustalOmega``` program which is a new multi-sequence alignment program that uses seeded guide trees and HMM profiling techniques. These alignments also allow us to merge together several HSPs (a single viral sequence having a hit blast with two regions close to the genome). We then use these protein alignments to build a phylogeny with the ```IQTree``` program.
+
+
+slowly decaying under neutral molecular evolution because they are no longer active. However in some cases EVEs provide a new
+function to the host and their genes can evolve under positive or negative selection.
+
+
+If we are now able to observe these horizontal transfer events, it is possible that (i) these genes may have subsequently pseudogenized as they slowly decaying under neutral molecular evolution because they are no longer active in eukaryotic genomes, or (ii) they may have provided an evolutionary advantage to their recipients, in which case such genes should have a complete reading frame without stop codon. In addition, if this type of gene provides a fitness advantage for its recipient, we expect it to be strongly constrained by selection.
+
+A particularly useful statistic for answering this question is operable for protein coding genes. It involves calculating the ratio of non-synonymous to synonymous substitutions ω = dN/ dS (non-synonymous substitutions are nucleotide changes that alter the protein sequence, synonymous substitutions do not). This ratio then measures the strength and mode of natural selection acting on protein genes, with ω > 1 indicating a positive selection (adaptive or diversifying), ω = 1 indicating a neutral evolution, and ω < 1 indicating a negative selection (purifying). The ω ratio summarizes the rates of gene evolution, and can be an informative feature, as it identifies the most (or least) conserved genes and also identifies genes that may have undergone periods of adaptive evolution. 
+
+In our study we know that the majority of viral genes known to have been domesticated are involved in the formation of vehicles to address virulence factors that disable the immune system of their hosts. These genes are thus very important for the wasp's reproductive success and therefore its fitness depends on them. 
+Most non-synonymous changes in the coding regions of this gene should then negatively alter the structure and function of the protein and should therefore be deleterious, whereas most synonymous changes should be almost neutral. As a result, we should see a ω < 1 for most domesticated genes.
+
+The program we use ```CODEML``` implemented in the python package ```ETE3``` (and all other programs) to compute dN/ dS requires alignments based on the codons of the DNA sequences of all the genes in each orthologic group, so the gaps must be positioned so as not to alter the reading frame.  For this we will use the program ``MACSE`` and its sub-program ```MACSE alignSequences```. This sub-program will allow to align the coding sequences at the protein level, then to retro-translate these alignments to the nucleotide format. It thus favours nucleotide spacing stretches which are multiples of three but also considers those inducing frame shifts, when they allow to recover the structure of the underlying codon. 
+
+With any level of divergence that provides sufficient power to detect adaptive evolution, alignments will contain errors that cause false positives and false negatives.  In particular, insertions and deletions are a major source of false positives in the detection of adaptive evolution. To eliminate potentially unreliable alignment columns or codons we use ```TrimAl``` . Trimming filtering of codon alignments via Trimal and its ``automate1`` option will produce a more conservative analysis, reducing both false positives and true positives. 
+
+There are many calculation methods to evaluate the mode and strength of natural selection in protein coding sequences. The most popular is the ```Goldman-Yang model```, in which there are independent DNA processes at each codon position, such that a different matrix is estimated for the 1st, 2nd and 3rd codon position (Goldman and Yang, 1994). In the ```Muse-Gaut model ```(Muse and Gaut, 1994), there is a DNA substitution process that applies equally to all three positions, resulting in a common substitution matrix between them.  We chose to use the less frequently used type model Muse-Gaut because it has much less bias compared to the Goldman-Yang model, which produces significantly biased dN/dS estimates on realistic sequence data (Stephanie J. Spielman and Claus O. Wilke, 2015). For this we used the parameters in codeml: estFreq=1 (the frequency/fitness parameters are estimated by ML from the data) & CodonFreq=4 (use the MG94 codon model) see file ```control.py``` to add these changes to the ete3 evoltree package. 
+
+
+At this level we have both a **phylogeny reconstructing the evolutionary history of the studied cluster**, as well as a **codon alignment cleaned of ambiguous sites**. 
+
+Studying the profiles of oppositional selections on loci of viral origin in the Hymenoptera genomes means facing three problems: 
+
+1- Given that the sampling of viral sequences and the sampling of genomes of Hymenoptera species is today largely underestimated, we only have a remnant of the evolutionary history of the acquisition of these genes. We must therefore carefully analyze the results chosen.  
+
+2- Since this is a viral gene that has been integrated into a eukaryotic genome, if this eukaryotic locus is present only in a eukaryotic species, then estimating a dN/dS value means averaging the evolutionary forces that operated on this gene when it was present in the viral genome and those that have operated since its integration into the eukaryotic genome. Thus, the only way to calculate a dN/dS having a biological meaning is (i) when at least two phylogenetically close species share a homology for this gene (we thus measure the selection force that has operated on this gene since its acquisition by the common entree of the two species), or (ii) if this gene of viral origin has integrated into a viral genome and then duplicated (we thus measure the selection force that has operated on this gene since the duplication of this gene). 
+
+3- Finally, adaptive or purifying evolution rarely occurs in all species of a phylogeny, the most likely scenario is that positive or negative selection has occurred in certain branches of the phylogeny. It is therefore appropriate to focus on phylogenies of clusters with certain very specific branches that probably translate **a horizontal transfer event from a viral gene** to one or more Hymenoptera species.  
+
+**How to identify these horizontal transfer events?** One of the options is to compare the phylogenetic tree of the species and that of the gene (cluster). We then expect a likely HGT event to correspond to an event where several phylogenetically close species all share the same gene of viral origin and are close within the gene tree. For this we use a letic analysis ``Monophyletic.py``.
+Develop /// 
+
+
+This analysis then allows us to target the monophyletic groups and thus to run an estimation of the dN/dS for each of the monophyletic groups along their branches ```dNdS_analyser.py```. We can then statistically compare a null model with free branches and an alternative model in which we force the branches of interest to evolve under a neutral regime (dN/dS = 1). If this likelihood ratio test returns a pvalue < 0.05, it means that the branches studied evolve significantly under a selection regime different from neutral, therefore different from zero.
+
+
+
+## Alignment of clusters
+
+**Working Directory : /beegfs/data/bguinet/these/Gene_phylogeny
+
+For each cluster the idea is to build a phylogeny in order to assess whether the candidate loci are under purifying, neutral or positif selection.
+
+______________________
+
+### Assembly of the clustered sequences in a common file
+
+By taking the blast informations of loci present within each cluster and the corresponding viral hits, we will create the cluster file (AA and NT)
+
+![Image description](Cluster_analysis)
+
+* Snakemake file : **Snakefile_Alignment_phylogeny_analysis**
+* Snakemake rule : **Create_cluster_files*
+
+* Script used : **Get_loci_and_seq_for_phylo.py *
+
+Important file created :
+- **/beegfs/data/bguinet/these/Cluster_alignment3/Cluster_seqs/{cluster_number}.dna** (Viral loci and viral sequences in nucleotides format for dN/dS analysis)
+- **/beegfs/data/bguinet/these/Cluster_alignment3/Cluster_seqs/{cluster_number}.aa** (Viral loci and viral sequences in protein format)
+
+______________________
+
+### Alignment of each clusters
+
+We will first do a first alignment using CLUSTAO in Amino acide sequences in order to target HSP sequences (when within a cluster, 2 sequences from the same species and same scaffold are overllaping within the alignement). 
+
+
+* Snakemake file : **Snakefile_Alignment_phylogeny_analysis**
+* Snakemake rule : **Omega_cluster_alignment*
+
+* Script used : **CLustalO*
+
+Important file created : **/beegfs/data/bguinet/these/Cluster_alignment3/Cluster_alignment/{cluster_number}.aa.aln** (All amino acide alignement clusters)
+
+
+______________________
+
+### HSPs analysis
+
+Now that we aligned each cluster, we will target all HSP and merge them within the previous files. 
+
+![Image description](HSPs_contatenation)
+
+*Candidates HSPs are candidats that are in the same scaffold and same species, then they could be duplicates or HSPs.
+A HSP is defined when the ratio between number of AA matching with another AA / nb AA matching with a gap is < 0.20.
+
+Exemple : if **scaffold1.1:1-900(-):Linepithema_humile & scaffold1:1200-2000(-):Linepithema_humile** are **overlapping > 20 aa**, the sequences are merged and called **scaffold1.1:2-HSPs(-):Linepithema_humile**
+
+* Snakemake file : **Snakefile_Alignment_phylogeny_analysis**
+* Snakemake rule : **Merge_Hsp_analysis*
+
+* Script used : **Merge_HSP_sequences_within_clusters2.py*
+
+Important file created : **/beegfs/data/bguinet/these/Monophyletic_assessment3/Monophyletic_tab.tab** (A table used within the Monophyletic_analysis rule from Snakefile_add_informations which stores all the Loci corresponding HSP names)
+
+______________________
+
+
+### Alignment of DNA sequences with MACSE
+
+The idea here is to use **MACSE v2** software so first we will align the nucleotides sequences using the MACSE subprogram **alignSequences** which aligns protein-coding sequences at the nucleotide level while scoring the considered nucleotide alignments based on their amino acid translation. It thus favours nucleotide gap stretches that are multiple of three but also considers those inducing frameshifts, when they allow to recover the underlying codon structure. MACSE therefore produces alignments which benefit from the higher similarity of amino acid sequences while accounting for frameshifts and stop codons that could occur in pseudogenes or in poor quality sequences;
+
+Then, because our analyse is sensitive to alignment errors (dN/dS estimation), we will use a post filtering of the alignment at the amino acid level (using **trimAl**) and we will report this AA masking/filtering at the nucleotide level using **reportMaskAA2NT**
+
+
+* Snakemake file : **Snakefile_Alignment_phylogeny_analysis**
+* Snakemake rule : **MACSE_cluster_alignment*
+
+* Script used : **macse_v2.05.jar alignSequences*
+
+Important file created : 
+**/beegfs/data/bguinet/these/Cluster_alignment/Codon_alignment_clusters/{cluster_number}_NT.dna** (The NT codon alignment file)
+**/beegfs/data/bguinet/these/Cluster_alignment/Codon_alignment_clusters/{cluster_number}_AA.dna** (The AA codon alignment file)
+
+______________________
+
+
+### Trimming on the codon alignment
+
+First Codon file should be unaligned. We can remove gaps from the input MSA using readal. Because macse symbols add "!" for frame shifts and in the process dnds this symbol is not tolerated, we will replace them in all alignments with a space Then we can trim the non-homoogous sites by giving as an input a protein-based MSA and a multiFASTA codon file (option -backtrans). Then, trimAl will trim the protein MSA and return as output the codon-based alignment.
+
+Then we can use trimAl as intended - bear in mind I'm using the "ignorestopcodon" flag to remove the stopcodon. Alternatively, you can use "splitbystopcodon"
+
+* Snakemake file : **Snakefile_Alignment_phylogeny_analysis**
+* Snakemake rule : **Clean_codon_alignment*
+
+* Script used : **readal, trimal*
+
+Important file created : 
+**/beegfs/data/bguinet/these/Cluster_alignment/Codon_alignment_clusters/{cluster_number}_NT.dna** (The NT codon alignment file)
+**/beegfs/data/bguinet/these/Cluster_alignment/Codon_alignment_clusters/{cluster_number}_AA.dna** (The AA codon alignment file)
+**/beegfs/data/bguinet/these/Cluster_alignment/Codon_alignment_clusters/Cluster*_NT.dna_without_shift** (The NT codon alignment file without "!")
+**/beegfs/data/bguinet/these/Cluster_alignment/Codon_alignment_clusters/Cluster*_AA.dna_without_shift** (The AA codon alignment file without "!")
+**/beegfs/data/bguinet/these/Cluster_alignment/Codon_alignment_clusters/Cluster*_NT.dna_without_shift_cleaned** (The NT codon alignment file without "!" and trimmed)
+**/beegfs/data/bguinet/these/Cluster_alignment/Codon_alignment_clusters/Cluster*_AA.dna_without_shift_cleaned** (The AA codon alignment file without "!" and trimmed)
+
+______________________
+
+
+## Phylogeny of clusters
+
+
+Cluster phylogeny will be performed on the AA alignments of MACSE because, as we have already performed blast analyses on viral protein coding sequences, hymenoptera loci should also be coding sequences. 
+Thus, the loci should be aligned with a method that includes coding information to align the sequences. 
+In addition, we have not included a trimming step on amino acid alignment for phylogeny since this may result in loss of information. 
+
+The topological alignments have not been trimmed because publications have shown that there was no difference when using Trimal (Trili strategy) the pvalue shows all non-significant except for HMMercleaner ot Ommacse, so filtering is useless (does not change topology when using a statistic based on the distance of quads between topologies), there is however an effect on the branch length (Ranwez and Chantret (2020) analysis and see also Ge Tan et al 2015 for older), so it is necessary to trim when we want to do a dN/dS analysis. There is often a tendency to infer from the selection because of alignment errors 
+
+![Image description](Cluster_phylogeny.jpeg)
+
+* Snakemake file : **Snakefile_Alignment_phylogeny_analysis**
+* Snakemake rule : **Cluster_phylogeny*
+
+* Script used : **iqtree*
+
+Important file created : 
+**/beegfs/data/bguinet/these/Cluster_phylogeny/{CLuster_number}_AA.dna.treefile** (The phylogenetic newick file of the cluster alignment)
+
+_____________________
