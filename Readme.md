@@ -1,3 +1,10 @@
+### Genome downloading and processing
+
+- This can be done by uploading the genomes of interest to an assembled genome sharing platform such as NCBI.
+
+- Once all the genomes have been uploaded, the quality of the assembly of these genomes should be assessed through descriptive statistics and the prevalence of BUSCO genes.
+
+
 ### Downloading viral databases
 
 **NCBI viruses proteins database :** https://www.ncbi.nlm.nih.gov/labs/virus/vssi/#/virus?SeqType_s=Protein&VirusLineage_ss=Viruses,%20taxid:10239
