@@ -1,0 +1,51 @@
+
+#First we need to concanate all scaffold containing BUSCO or candidat EVEs within the same file
+
+#Usage example on cluster 
+
+#nohup snakemake -j 8000  -s Snakefile_BlastX_repeat   --cluster "sbatch -J {params.name} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_BlastX_repeat.out &
+
+mmseqs="/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs"
+
+#Snakefile_name : Snakefile_Scaffold_Extraction
+
+#Define your paths :
+
+#File with all species names 
+Species_name_file= "/beegfs/data/bguinet/these/Species_genome_names.txt"
+Species_genomes_path="/beegfs/data/bguinet/these/Genomes"
+
+list_of_names=[]
+for names in open(Species_name_file,"r"):
+        list_of_names.append(names.replace("\n", ""))
+print("Processing ...")
+print(list_of_names)
+
+rule all:
+  input:
+        expand("/beegfs/data/bguinet/these/Extracted_scaffolds/EVEs_Extracted_scaffolds_{sp_names}.fna", sp_names = list_of_names),
+        "/beegfs/data/bguinet/these/Repeat_env_analysis2/BlastX_BUSCO_and_EVEs_on_RepeatPeps_results.m8"
+
+
+rule BlastX_repeat_analysis:
+  params:
+     threads="20",
+     time="5:00:00",
+     name="BlastX_repeat",
+     out="/beegfs/data/bguinet/these/Repeat_env_analysis2/BlastX_repeat.out",
+     err="/beegfs/data/bguinet/these/Repeat_env_analysis2/BlastX_repeat.error"
+  input:
+     Repeat_AA_db="/beegfs/data/bguinet/these/Repeat_env_analysis2/RepeatPeps.faa"
+  output:
+     BlastX_output="/beegfs/data/bguinet/these/Repeat_env_analysis2/BlastX_BUSCO_and_EVEs_on_RepeatPeps_results.m8"
+  shell:
+     """
+     #Gather all scaffolds into one Unique file 
+     #cat /beegfs/data/bguinet/these/Extracted_scaffolds/*.fna >> /beegfs/data/bguinet/these/Extracted_scaffolds/EVEs_Extracted_scaffolds_ALL.fna
+     {mmseqs} createdb {input.Repeat_AA_db} /beegfs/data/bguinet/these/Repeat_env_analysis2/RepeatPeps_db
+     {mmseqs} createdb /beegfs/data/bguinet/these/Extracted_scaffolds/EVEs_Extracted_scaffolds_ALL.fna /beegfs/data/bguinet/these/Extracted_scaffolds/EVEs_Extracted_scaffolds_ALL_db
+     {mmseqs} search /beegfs/data/bguinet/these/Extracted_scaffolds/EVEs_Extracted_scaffolds_ALL_db /beegfs/data/bguinet/these/Repeat_env_analysis2/RepeatPeps_db /beegfs/data/bguinet/these/Repeat_env_analysis2/BlastX_BUSCO_and_EVEs_on_R$
+     {mmseqs} convertalis --format-output "query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qlen,tlen,tcov" /beegfs/data/bguinet/these/Extracted_scaffolds/EVEs_Extracted_scaffolds_ALL_db /beegfs/data/bguin$
+     #python3 /beegfs/home/bguinet/these_scripts_2/Make_change_strand_mmseqs2.py -b All_scaffold_repeat_search_result_dna.m8 -t Repeat -o All_scaffold_repeat_search_result_dna_strand_V.m8
+     #python3 /beegfs/home/bguinet/these_scripts_2/Filter_repeat_results.py -b /beegfs/data/bguinet/these/Repeat_env_analysis/All_scaffold_repeat_search_result_dna.m8 -o /beegfs/data/bguinet/these/Repeat_env_analysis/All_scaffold_repeat$
+     """
