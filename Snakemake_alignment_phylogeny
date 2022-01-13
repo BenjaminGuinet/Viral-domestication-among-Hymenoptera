@@ -5,7 +5,7 @@
 
 #  ./Cluster_alignment_phylo
 #          ./Cluster_seqs     (all .aa and .dna cluster files)
-#          ./Cluster_alignment  (all .aa Clustal alignments)
+#          ./Cluster_alignment  (all .aa Omega alignments)
 #          ./Codon_alignment_clusters (all _NT.dna and _AA.dna MACSE codon alignments)
 #
 #  ./Cluster_phylogeny ( all _AA.dna.treefile Iqtree phylogenies)
