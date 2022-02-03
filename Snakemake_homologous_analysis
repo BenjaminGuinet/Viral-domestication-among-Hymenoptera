@@ -7,61 +7,54 @@ import re
 import os
 
 #Programs
-
 mmseqs2="/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs" #(version 5daca424b162cc5fdf0b9cd151aebed86975cbf6)
 
 #Load species names
 Species_name_file="/beegfs/data/bguinet/these/Species_genome_names_test.txt"
-list_of_names1=[]
+list_of_names=[]
 for names in open(Species_name_file,"r"):
- 	list_of_names1.append(names)
+ 	list_of_names.append(names.replace("\n", ""))
 
-list_of_names2=[]
-for names in list_of_names1:
- 	list_of_names2.append(names.replace("\n", ""))
 
-SAMPLES=[]
-for i in list_of_names2:
-	SAMPLES.append(i)
-
+#This rule contains all the expected output from all your rules within the snakefile 
 rule all:
   input:
-       expand("/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.fna", names = SAMPLES),
-       expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2_strand_V.m8", names = SAMPLES),
-       expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2_strand_summary_V.m8", names = SAMPLES),
-       expand("/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.faa",names = SAMPLES)
-       # expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/.tab", names = SAMPLES),
-       # expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8", names = SAMPLES),
-       # expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2_V/result_mmseqs2_strand_V.m8", names = SAMPLES),
-       # expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2_V/result_mmseqs2_summary_V.m8", names = SAMPLES)
+       expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8", names = list_of_names),
+       expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2_V/result_mmseqs2_strand_V.m8", names = list_of_names),
+       expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2_V/result_mmseqs2_summary_V.m8", names = list_of_names),
+       expand("/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.fna", names = list_of_names),
+       expand("/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.faa",names = list_of_names)
+
 
 #First create the viral db :
 #{mmseqs2} createdb {input.Viraldb} /beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db
+
+#Then run the BlastX (Mmseqs2) with Genomes as queries and Virus db as database 
 rule Homology_analysis:
     input:
-      Viraldb="/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db",
+      Viraldb="/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db",   
       Genomedb="/beegfs/data/bguinet/these/Genomes/{names}/{names}_corrected.fa"
     output:
-        out= "/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8",
-        
+        out= "/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8",   
     shell:
         """
-        PYTHONPATH="/beegfs/home/bguinet/.local/lib/"
-        
+	#Create a directory where the BlastX results will be written 
         mkdir /beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/
-        
-        {mmseqs2} createdb {input.Genomedb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db
-                        
-        {mmseqs2} search /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db {input.Viraldb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/tpm -a -s 7.5 -e 0.01 --threads 10
-        
-	rm -r /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/tpm #Since Tpm file are heavy 
 	
-        {mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qaln'  /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/{wildcards.names}_mmseqs2_db {input.Viraldb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2.m8
+        #Create the genome db 
+        {mmseqs2} createdb {input.Genomedb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db
+            
+	#Run Mmseqs2 search equivalent BlastX
+        {mmseqs2} search /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db {input.Viraldb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/tpm -a -s 7.5 -e 0.01 --threads 10 --remove-tmp-files
+        
+	#Convert results with multiples columns 
+        {mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qaln,tcov'  /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/{wildcards.names}_mmseqs2_db {input.Viraldb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2.m8
 
         """
 
-#Define_loci
-#Note:  here we correct by the fact that we used MEC analysis wich changed the scaffolds names, if you do not have this issu please use -correct_scaf_name no arg in the 
+#Define_loci by first changing the strand of the results (hits on antisens strand changed to sens strand coordinates)
+#And then use the script Overlapping_sequences_BUSCO_Viral_loci2.R to merge overlapping hits with GenomicRanges
+#Note:  here we correct by the fact that we used MEC analysis wich changed the scaffolds names, if you do not have this issue please use -correct_scaf_name no arg in the 
 rule Define_loci:
     input:
         Blast_tab="/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8"
@@ -77,9 +70,9 @@ rule Define_loci:
 	/beegfs/data/soft/R-3.5.2/bin/Rscript /beegfs/home/bguinet/these_scripts_2/Overlapping_sequences_BUSCO_Viral_loci2.R {output.out1} {output.out2}
         """
 
-             
+           
+#We extract candidates loci based on their coordinates on genomes 	   
 #rule Extract_loci: 
-#Need to be simplified since query aln is now present within the table 
 rule Extract_loci:
     threads: 1
     log: 
@@ -94,7 +87,9 @@ rule Extract_loci:
          #Add species name into the loci names 
 	 sed -i 's@)@):{wildcards.names}@g' {output.Loci_dna_output} 
 	 """
-        
+       
+       
+#We translate all the candidate loci 
 rule Translate_loci:
     threads: 1
     input:
@@ -105,6 +100,9 @@ rule Translate_loci:
          """
          python3 /beegfs/home/bguinet/these_scripts_2/Translate_DNA_to_AA.py -f {input.Loci_dna} -o {output.Loci_aa}
          """
+
+#We Filter all the candidate loci based on : 
+
 
 rule Filter_loci:
 	input: 
