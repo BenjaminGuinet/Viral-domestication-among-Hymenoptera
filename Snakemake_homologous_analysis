@@ -118,8 +118,10 @@ rule Translate_loci:
          python3 /beegfs/home/bguinet/these_scripts_2/Translate_DNA_to_AA.py -f {input.Loci_dna} -o {output.Loci_aa}
 	 
 	 #Concatenate protein loci and previous viral protein database
-	 cat {output.Loci_aa} {input.Viraldb} >> /beegfs/data/bguinet/these/Clustering3/Candidate_viral_loci_and_viral_protein.aa
+	 cat {output.Loci_aa} >> /beegfs/data/bguinet/these/Clustering3/Candidate_viral_loci_and_viral_protein.aa
          """
+	 
+	 
 
 #We Filter all the candidate loci based on : 
 
@@ -133,6 +135,8 @@ rule Filter_loci:
 
 	shell:
 	"""
+	        #Add viral protein sequences within the file with all virus candidat loci
+	        cat {input.Viraldb}  >> /beegfs/data/bguinet/these/Clustering3/Candidate_viral_loci_and_viral_protein.aa
 		#Put all Fasta sequence into one unique file :
 		cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci.fna >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.fna ; done 
 		cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci.faa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.aa ; done 
