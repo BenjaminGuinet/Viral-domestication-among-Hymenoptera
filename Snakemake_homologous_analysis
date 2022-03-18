@@ -19,6 +19,7 @@ for names in open(Species_name_file,"r"):
 #This rule contains all the expected output from all your rules within the snakefile 
 rule all:
   input:
+       "/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db",
        expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8", names = list_of_names),
        expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2_V/result_mmseqs2_strand_V.m8", names = list_of_names),
        expand("/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2_V/result_mmseqs2_summary_V.m8", names = list_of_names),
@@ -27,13 +28,29 @@ rule all:
 
 
 #First create the viral db :
-#{mmseqs2} createdb {input.Viraldb} /beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db
 
+rule Create_viral_db:
+      input:
+        Viraldb="/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup.fa"
+      output:
+        Viral_mmseqs2_db="/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db"
+      shell:
+        """
+        {mmseqs2} createdb {input.Viraldb} {output.Viral_mmseqs2_db}
+        """
+	
 #Then run the BlastX (Mmseqs2) with Genomes as queries and Virus db as database 
 rule Homology_analysis:
+     params:
+      threads="10",
+      time="48:00:00",
+      mem="5G",  #Carrefull if more than 40G -> --partition=bigmem
+      name="Mmseqs2_{names}",
+      out="/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/Mmseqs2_viral_search.out",
+      err="/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/Mmseqs2_viral_search.error
     input:
-      Viraldb="/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db",   
-      Genomedb="/beegfs/data/bguinet/these/Genomes/{names}/{names}_corrected.fa"
+       Viral_mmseqs2_db="/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db",
+       Genomedb="/beegfs/data/bguinet/these/Genomes/{names}/{names}_corrected.fa"
     output:
         out= "/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2.m8",   
     shell:
@@ -45,10 +62,10 @@ rule Homology_analysis:
         {mmseqs2} createdb {input.Genomedb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db
             
 	#Run Mmseqs2 search equivalent BlastX
-        {mmseqs2} search /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db {input.Viraldb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/tpm -a -s 7.5 -e 0.01 --threads 10 --remove-tmp-files
+        {mmseqs2} search /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db {input.Viral_mmseqs2_db} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/tpm -a -s 7.5 -e 0.0001 --threads 10 --remove-tmp-files
         
 	#Convert results with multiples columns 
-        {mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qaln,tcov'  /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/{wildcards.names}_mmseqs2_db {input.Viraldb} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2.m8
+        {mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qaln,tcov'  /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/{wildcards.names}_mmseqs2_db {input.Viral_mmseqs2_db} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2.m8
 
         """
 
@@ -61,7 +78,6 @@ rule Define_loci:
     output:
         out1= "/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2_strand_V.m8",
         out2= "/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/result_mmseqs2_strand_summary_V.m8"
-	
     threads: 1
     shell:
         """
@@ -93,16 +109,19 @@ rule Extract_loci:
 rule Translate_loci:
     threads: 1
     input:
-        Loci_dna="/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.fna"
+        Loci_dna="/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.fna",
+	Viraldb="/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup.fa
     output:
         Loci_aa="/beegfs/data/bguinet/these/Genomes/{names}/Fasta_viral_loci.faa"
     shell:
          """
          python3 /beegfs/home/bguinet/these_scripts_2/Translate_DNA_to_AA.py -f {input.Loci_dna} -o {output.Loci_aa}
+	 
+	 #Concatenate protein loci and previous viral protein database
+	 cat {output.Loci_aa} {input.Viraldb} >> /beegfs/data/bguinet/these/Clustering3/Candidate_viral_loci_and_viral_protein.aa
          """
 
 #We Filter all the candidate loci based on : 
-
 
 rule Filter_loci:
 	input: 
