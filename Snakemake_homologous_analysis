@@ -134,8 +134,8 @@ rule Filter_loci:
 	shell:
 	"""
 		#Put all Fasta sequence into one unique file :
-		cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci_${line}.fna >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.fna ; done 
-		cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci_${line}.faa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.aa ; done 
+		cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci.fna >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.fna ; done 
+		cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci.faa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.aa ; done 
 		{mmseqs2} createdb {Candidate_loci} /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db
 		{mmseqs2} search /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db {input.Nr_db}  /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr_tpm 
 		{mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tcov' /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db /beegfs/data/bguinet/these/NR_db /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr {output.Candidate_loci_Nr_output} -s 7 --threads 20
