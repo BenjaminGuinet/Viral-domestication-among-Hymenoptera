@@ -42,12 +42,12 @@ rule Create_viral_db:
 #Then run the BlastX (Mmseqs2) with Genomes as queries and Virus db as database 
 rule Homology_analysis:
      params:
-      threads="10",
-      time="48:00:00",
-      mem="5G",  #Carrefull if more than 40G -> --partition=bigmem
-      name="Mmseqs2_{names}",
-      out="/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/Mmseqs2_viral_search.out",
-      err="/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/Mmseqs2_viral_search.error
+       threads="10",
+       time="48:00:00",
+       mem="5G",  #Carrefull if more than 40G -> --partition=bigmem
+       name="Mmseqs2_{names}",
+       out="/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/Mmseqs2_viral_search.out",
+       err="/beegfs/data/bguinet/these/Genomes/{names}/run_mmseqs2/Mmseqs2_viral_search.error
     input:
        Viral_mmseqs2_db="/beegfs/data/bguinet/these/Clustering3/Viral_protein_nodup_db",
        Genomedb="/beegfs/data/bguinet/these/Genomes/{names}/{names}_corrected.fa"
