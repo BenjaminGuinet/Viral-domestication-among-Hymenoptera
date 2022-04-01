@@ -65,7 +65,7 @@ rule Homology_analysis:
         {mmseqs2} search /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/{wildcards.names}_mmseqs2_db {input.Viral_mmseqs2_db} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmseqs2/tpm -a -s 7.5 -e 0.0001 --threads 10 --remove-tmp-files
         
 	#Convert results with multiples columns 
-        {mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qaln,tcov'  /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/{wildcards.names}_mmseqs2_db {input.Viral_mmseqs2_db} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2.m8
+        {mmseqs2} convertalis --format-output 'query,tlen,qlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qaln,taln,tcov,qcov'  /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/{wildcards.names}_mmseqs2_db {input.Viral_mmseqs2_db} /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2 /beegfs/data/bguinet/these/Genomes/{wildcards.names}/run_mmmseqs2/result_mmseqs2.m8
 
         """
 
