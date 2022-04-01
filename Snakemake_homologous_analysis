@@ -142,7 +142,7 @@ rule Filter_loci:
 		cat /beegfs/data/bguinet/these/Species_genome_names.txt | while read line; do cat /beegfs/data/bguinet/these/Genomes/${line}/Fasta_viral_loci.faa >> /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci.aa ; done 
 		{mmseqs2} createdb {Candidate_loci} /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db
 		{mmseqs2} search /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db {input.Nr_db}  /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr_tpm 
-		{mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tcov' /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db /beegfs/data/bguinet/these/NR_db /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr {output.Candidate_loci_Nr_output} -s 7 --threads 20
+		{mmseqs2} convertalis --format-output 'query,tlen,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tcov,taxid,taxname,taxlineage' /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_db /beegfs/data/bguinet/these/NR_db /beegfs/data/bguinet/these/Results/Candidate_viral_loci_Nr {output.Candidate_loci_Nr_output} -s 7 --threads 20
 		python3 Filter_loci_with_NR.py  -Nr {output.Candidate_loci_Nr_output} -o {output.Candidate_loci_filtred_output}
 		#Need to add a code within Filter_loci_with_NR.py in order to create a /beegfs/data/bguinet/these/Viral_sequences_loci/All_fasta_viral_loci_filtred.aa file
 	""" 
