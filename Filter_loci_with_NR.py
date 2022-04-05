@@ -69,9 +69,17 @@ NR_blast.to_csv(out_file,sep=";",Index=FALSE)
 
 #Filter fasta file of candidate loci using filtered Blast
 Fasta_file=open(args.fasta, "r")
-record_dict = SeqIO.to_dict(SeqIO.parse(Fasta_file, "fasta"))
+record_dict_aa = SeqIO.to_dict(SeqIO.parse(Fasta_file_aa, "fasta"))
+record_dict_dna = SeqIO.to_dict(SeqIO.parse(Fasta_file_dna, "fasta"))
 
-with open(args.out_fasta,"w") as output:
+#Save AA format
+with open(args.out_fasta_aa,"w") as output:
     for i in Blast_filtered['query'].unique():
-        print('>',record_dict['query'].id,sep="",file=output)
+        print('>',record_dict_aa['query'].id,sep="",file=output)
+        print(record_dict['query'].seq,file=output)
+
+#Save DNA format
+with open(args.out_fasta_dna,"w") as output:
+    for i in Blast_filtered['query'].unique():
+        print('>',record_dict_dna['query'].id,sep="",file=output)
         print(record_dict['query'].seq,file=output)
