@@ -24,12 +24,11 @@ parser.add_argument("-blst", "--blast_type", help="The type of blast : support b
 parser.add_argument("-del", "--Output_delimitator",help="The desired output delimitator, by default : ';'  but you cand add tabular format with the option : 'tab'")
 
 
-
 args = parser.parse_args()
 
 """
-Ex usage python3 add_taxid_info.py -blst Mmseqs2  -b /beegfs/data/bguinet/these/Horizon_project_part/tBLASTn_VLPs/Matches_VLPs_prot_vs_NR_mmseqs2_all.m8 -d /beegfs/data/bguinet/taxadb/taxadb_new.sqlite -o /beegfs/data/bguinet/these/Horizon_project_part/tBLASTn_VLPs/Matches_VLPs_prot_vs_NR_mmseqs2_all_taxid.m8 
-python3 python_test.py -blst Mmseqs2  -b tab_test -d /beegfs/data/bguinet/taxadb/taxadb_new.sqlite -o tab_test_taxid.m8 
+Ex usage python3 add_taxid_info.py -blst Mmseqs2 -b /beegfs/data/bguinet/these/Horizon_project_part/tBLASTn_VLPs/Matches_VLPs_prot_vs_NR_mmseqs2_all.m8 -d /beegfs/data/bguinet/taxadb/taxadb_new.sqlite -o /beegfs/data/bguinet/these/Horizon_project_part/tBLASTn_VLPs/Matches_VLPs_prot_vs_NR_mmseqs2_all_taxid.m8 
+ /beegfs/data/bguinet/taxadb2/taxadb.sqlite -o tab_test_taxid.m8 
 """
 
 """
@@ -86,10 +85,7 @@ blast_type=args.blast_type
 
 #Open the blast dataframe by keeping the column names 
 blast=pd.read_csv(blast_file,sep="\t")
-
-#remove all hits abox 0.01 evalue 
-
-blast = blast.loc[blast['evalue'].lt(0.01)]
+blast.columns=[] # ajouter colonnes
 
 #print(blast)
 #blast=blast.groupby('query').head(3) #in order to only have 3 estimations for taxid/queries to save time
@@ -144,7 +140,6 @@ for sublist in chunk(Acc_number_list,number_of_sub_acc_number_lists):
 		sys.stdout.flush()  # As suggested by Rom Ruben
 		filecount += 1
 
-
 # Add to the blast table the 'Taxid' column.
 if blast_type == 'blast' or blast_type == 'diamond' or blast_type == 'Blast' or blast_type == 'Diamond' :
 	blast['Taxid']=blast.ssid.str.split(".").str[0].map(dict(zip(blast_taxid.Acc_number,blast_taxid.Taxid)))
@@ -184,7 +179,6 @@ for tax_ID in blast_taxid['Taxid']:
 
 print("Recovery process of taxonomic informations done" )
 
-
 #Add taxonomic informations into the blast dataframe
 blast=blast.merge(pd.DataFrame({k: dict(v) for k, v in Taxid_dictionnary.items()}).T, left_on='Taxid', right_index=True,how='outer')
 #Remove NA values
@@ -195,56 +189,7 @@ blast=blast.replace(' ', '_', regex=True)
 #Remove the column 'New_Acc_number'
 blast=blast.drop(columns=['New_Acc_number'])
 
-"""
-#################
-#ADDD genomic structure informations 
-
-Virus_genomic_structure_tab=pd.read_csv("/beegfs/data/bguinet/these/NCBI_nucleotides_viruses/All_virus_families_informations.csv",sep=";",header=0,encoding='latin-1')
-###This table comes from the  Virus Metadata Repository: version November 27, 2019; MSL34
-Virus_genomic_structure_tab=Virus_genomic_structure_tab[['Family','Genome composition']]
-Virus_genomic_structure_tab = Virus_genomic_structure_tab.drop_duplicates()
-
-Virus_genomic_structure_tab.columns = ['family', 'genomic_structure']
-Virus_genomic_structure_tab=Virus_genomic_structure_tab.dropna()
-
-
-blast =pd.merge(blast, Virus_genomic_structure_tab, left_on='family', right_on='family',how='outer')
-#blast = blast[blast['Clustername'].notna()]
-#Carrefull here in the customised code only representative of the result of this paper
-blast.loc[blast['species'] == "Leptopilina_boulardi_filamentous_virus", ['genomic_structure']] = 'dsDNA'
-blast.loc[blast['species'] == "Leptopilina_boulardi_filamentous_virus", ['family']] = 'LbFV-like family'
-blast.loc[blast['target'].str.contains("QKN22",na=False),['genomic_structure']] = 'dsDNA' 
-blast.loc[blast['target'].str.contains("QKN22",na=False),['species']] = "Drosophila-associated filamentous virus"
-blast.loc[blast['target'].str.contains("QKN22",na=False),['family']] = 'LbFV-like family' 
-
-
-#Remove NA 
-blast = blast[blast['query'].notna()]
-"""
-
 blast.to_csv(out_file,sep=";",index=False)
-
-#Merge all information with the revious blast dataframe 
-"""
-blast2=pd.read_csv(blast_file,header=0,sep=";")
-
-#blast.drop(['Unnamed:_0', 'Clustername', 'query', 'pident', 'alnlen', 'mismatch', 'gapopen', 'qstart', 'qend', 'tstart', 'tend', 'evalue', 'bits', 'tlen'], axis = 1, inplace = True) 
-
-blast.drop(['query', 'pident', 'alnlen', 'mismatch', 'gapopen', 'qstart', 'qend', 'tstart', 'tend', 'evalue', 'bits'], axis = 1, inplace = True) 
-blast3=pd.merge(blast2,blast,on='target', how='outer')
-blast3=blast3.drop_duplicates(subset=['query', 'target'], keep='first')
-
-
-
-print("Number of queries with a family assigned : ", len(blast3[blast3['family'].notna()]['query'].unique()))
-print("Number of queries with a species assigned : ", len(blast3[blast3['species'].notna()]['query'].unique()))
-
-if args.Output_delimitator=="tab":
-	blast3.to_csv(out_file, sep="\t",index=False)
-else:
-	blast3.to_csv(out_file, sep=";",index=False)
-"""
-
 
 print("\n")
 print("Process done")
