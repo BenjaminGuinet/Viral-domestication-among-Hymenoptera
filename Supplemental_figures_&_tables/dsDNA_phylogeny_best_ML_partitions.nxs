@@ -1,0 +1,288 @@
+#nexus
+begin sets;
+  charset Cluster101.aa.ali.trimmed = 1-116;
+  charset Cluster104.aa.ali.trimmed = 117-202;
+  charset Cluster1079.aa.ali.trimmed = 203-302;
+  charset Cluster1107.aa.ali.trimmed = 303-378;
+  charset Cluster12.aa.ali.trimmed = 379-619;
+  charset Cluster121.aa.ali.trimmed = 620-787;
+  charset Cluster125.aa.ali.trimmed = 788-1011;
+  charset Cluster128.aa.ali.trimmed = 1012-1193;
+  charset Cluster1288.aa.ali.trimmed = 1194-1312;
+  charset Cluster13.aa.ali.trimmed = 1313-1679;
+  charset Cluster132.aa.ali.trimmed = 1680-1854;
+  charset Cluster135.aa.ali.trimmed = 1855-1987;
+  charset Cluster139.aa.ali.trimmed = 1988-2729;
+  charset Cluster14.aa.ali.trimmed = 2730-2963;
+  charset Cluster1413.aa.ali.trimmed = 2964-3504;
+  charset Cluster142.aa.ali.trimmed = 3505-3703;
+  charset Cluster149.aa.ali.trimmed = 3704-3829;
+  charset Cluster15.aa.ali.trimmed = 3830-3934;
+  charset Cluster153.aa.ali.trimmed = 3935-4154;
+  charset Cluster157.aa.ali.trimmed = 4155-4436;
+  charset Cluster160.aa.ali.trimmed = 4437-4665;
+  charset Cluster162.aa.ali.trimmed = 4666-4835;
+  charset Cluster173.aa.ali.trimmed = 4836-5079;
+  charset Cluster180.aa.ali.trimmed = 5080-5251;
+  charset Cluster182.aa.ali.trimmed = 5252-5357;
+  charset Cluster185.aa.ali.trimmed = 5358-5677;
+  charset Cluster19.aa.ali.trimmed = 5678-5932;
+  charset Cluster192.aa.ali.trimmed = 5933-6183;
+  charset Cluster198.aa.ali.trimmed = 6184-6464;
+  charset Cluster199.aa.ali.trimmed = 6465-7212;
+  charset Cluster2.aa.ali.trimmed = 7213-7457;
+  charset Cluster2040.aa.ali.trimmed = 7458-7678;
+  charset Cluster206.aa.ali.trimmed = 7679-7951;
+  charset Cluster208.aa.ali.trimmed = 7952-8193;
+  charset Cluster211.aa.ali.trimmed = 8194-8442;
+  charset Cluster213.aa.ali.trimmed = 8443-8585;
+  charset Cluster214.aa.ali.trimmed = 8586-8673;
+  charset Cluster227.aa.ali.trimmed = 8674-9010;
+  charset Cluster237.aa.ali.trimmed = 9011-9061;
+  charset Cluster24.aa.ali.trimmed = 9062-9173;
+  charset Cluster245.aa.ali.trimmed = 9174-9312;
+  charset Cluster247.aa.ali.trimmed = 9313-9455;
+  charset Cluster252.aa.ali.trimmed = 9456-9776;
+  charset Cluster253.aa.ali.trimmed = 9777-10004;
+  charset Cluster255.aa.ali.trimmed = 10005-10242;
+  charset Cluster257.aa.ali.trimmed = 10243-10480;
+  charset Cluster258.aa.ali.trimmed = 10481-10751;
+  charset Cluster259.aa.ali.trimmed = 10752-10839;
+  charset Cluster266.aa.ali.trimmed = 10840-10935;
+  charset Cluster269.aa.ali.trimmed = 10936-11255;
+  charset Cluster27.aa.ali.trimmed = 11256-11534;
+  charset Cluster277.aa.ali.trimmed = 11535-11725;
+  charset Cluster28.aa.ali.trimmed = 11726-12117;
+  charset Cluster280.aa.ali.trimmed = 12118-12327;
+  charset Cluster29.aa.ali.trimmed = 12328-12485;
+  charset Cluster291.aa.ali.trimmed = 12486-12892;
+  charset Cluster293.aa.ali.trimmed = 12893-13013;
+  charset Cluster294.aa.ali.trimmed = 13014-13345;
+  charset Cluster297.aa.ali.trimmed = 13346-13703;
+  charset Cluster298.aa.ali.trimmed = 13704-13814;
+  charset Cluster3.aa.ali.trimmed = 13815-14140;
+  charset Cluster300.aa.ali.trimmed = 14141-14356;
+  charset Cluster302.aa.ali.trimmed = 14357-14694;
+  charset Cluster303.aa.ali.trimmed = 14695-15229;
+  charset Cluster304.aa.ali.trimmed = 15230-15330;
+  charset Cluster308.aa.ali.trimmed = 15331-15553;
+  charset Cluster327.aa.ali.trimmed = 15554-15849;
+  charset Cluster337.aa.ali.trimmed = 15850-16027;
+  charset Cluster344.aa.ali.trimmed = 16028-16161;
+  charset Cluster353.aa.ali.trimmed = 16162-16258;
+  charset Cluster354.aa.ali.trimmed = 16259-16450;
+  charset Cluster356.aa.ali.trimmed = 16451-16869;
+  charset Cluster360.aa.ali.trimmed = 16870-17093;
+  charset Cluster364.aa.ali.trimmed = 17094-17257;
+  charset Cluster366.aa.ali.trimmed = 17258-17807;
+  charset Cluster369.aa.ali.trimmed = 17808-18186;
+  charset Cluster374.aa.ali.trimmed = 18187-18780;
+  charset Cluster378.aa.ali.trimmed = 18781-18890;
+  charset Cluster38.aa.ali.trimmed = 18891-19029;
+  charset Cluster392.aa.ali.trimmed = 19030-19232;
+  charset Cluster393.aa.ali.trimmed = 19233-19554;
+  charset Cluster394.aa.ali.trimmed = 19555-19856;
+  charset Cluster4.aa.ali.trimmed = 19857-20038;
+  charset Cluster417.aa.ali.trimmed = 20039-20675;
+  charset Cluster427.aa.ali.trimmed = 20676-20973;
+  charset Cluster438.aa.ali.trimmed = 20974-21278;
+  charset Cluster44.aa.ali.trimmed = 21279-21646;
+  charset Cluster443.aa.ali.trimmed = 21647-21801;
+  charset Cluster447.aa.ali.trimmed = 21802-22015;
+  charset Cluster45.aa.ali.trimmed = 22016-23030;
+  charset Cluster450.aa.ali.trimmed = 23031-23977;
+  charset Cluster452.aa.ali.trimmed = 23978-24069;
+  charset Cluster466.aa.ali.trimmed = 24070-24589;
+  charset Cluster470.aa.ali.trimmed = 24590-25023;
+  charset Cluster475.aa.ali.trimmed = 25024-25223;
+  charset Cluster48.aa.ali.trimmed = 25224-25365;
+  charset Cluster495.aa.ali.trimmed = 25366-25616;
+  charset Cluster497.aa.ali.trimmed = 25617-25867;
+  charset Cluster5.aa.ali.trimmed = 25868-26453;
+  charset Cluster522.aa.ali.trimmed = 26454-26608;
+  charset Cluster525.aa.ali.trimmed = 26609-26814;
+  charset Cluster527.aa.ali.trimmed = 26815-27025;
+  charset Cluster533.aa.ali.trimmed = 27026-27162;
+  charset Cluster545.aa.ali.trimmed = 27163-27489;
+  charset Cluster563.aa.ali.trimmed = 27490-27618;
+  charset Cluster57.aa.ali.trimmed = 27619-27807;
+  charset Cluster574.aa.ali.trimmed = 27808-27999;
+  charset Cluster577.aa.ali.trimmed = 28000-28302;
+  charset Cluster59.aa.ali.trimmed = 28303-28576;
+  charset Cluster599.aa.ali.trimmed = 28577-28852;
+  charset Cluster6.aa.ali.trimmed = 28853-29219;
+  charset Cluster604.aa.ali.trimmed = 29220-29333;
+  charset Cluster615.aa.ali.trimmed = 29334-29664;
+  charset Cluster619.aa.ali.trimmed = 29665-30062;
+  charset Cluster62.aa.ali.trimmed = 30063-30438;
+  charset Cluster633.aa.ali.trimmed = 30439-30729;
+  charset Cluster653.aa.ali.trimmed = 30730-30955;
+  charset Cluster657.aa.ali.trimmed = 30956-31356;
+  charset Cluster670.aa.ali.trimmed = 31357-31652;
+  charset Cluster696.aa.ali.trimmed = 31653-31910;
+  charset Cluster7.aa.ali.trimmed = 31911-32183;
+  charset Cluster707.aa.ali.trimmed = 32184-32643;
+  charset Cluster73.aa.ali.trimmed = 32644-32835;
+  charset Cluster738.aa.ali.trimmed = 32836-33293;
+  charset Cluster74.aa.ali.trimmed = 33294-33789;
+  charset Cluster756.aa.ali.trimmed = 33790-34039;
+  charset Cluster76.aa.ali.trimmed = 34040-34197;
+  charset Cluster768.aa.ali.trimmed = 34198-34470;
+  charset Cluster81.aa.ali.trimmed = 34471-34588;
+  charset Cluster82.aa.ali.trimmed = 34589-34873;
+  charset Cluster823.aa.ali.trimmed = 34874-35597;
+  charset Cluster84.aa.ali.trimmed = 35598-35749;
+  charset Cluster844.aa.ali.trimmed = 35750-35812;
+  charset Cluster852.aa.ali.trimmed = 35813-36127;
+  charset Cluster864.aa.ali.trimmed = 36128-36296;
+  charset Cluster886.aa.ali.trimmed = 36297-36647;
+  charset Cluster893.aa.ali.trimmed = 36648-36884;
+  charset Cluster90.aa.ali.trimmed = 36885-37031;
+  charset Cluster928.aa.ali.trimmed = 37032-37482;
+  charset Cluster93.aa.ali.trimmed = 37483-37716;
+  charset Cluster933.aa.ali.trimmed = 37717-38031;
+  charset Cluster97.aa.ali.trimmed = 38032-38293;
+  charpartition mymodels =
+    LG+G4: Cluster101.aa.ali.trimmed,
+    Blosum62: Cluster104.aa.ali.trimmed,
+    LG: Cluster1079.aa.ali.trimmed,
+    PMB+I: Cluster1107.aa.ali.trimmed,
+    VT+F+G4: Cluster12.aa.ali.trimmed,
+    LG+G4: Cluster121.aa.ali.trimmed,
+    VT+I: Cluster125.aa.ali.trimmed,
+    LG+G4: Cluster128.aa.ali.trimmed,
+    Blosum62+G4: Cluster1288.aa.ali.trimmed,
+    LG+F+I: Cluster13.aa.ali.trimmed,
+    LG+I: Cluster132.aa.ali.trimmed,
+    Blosum62+R3: Cluster135.aa.ali.trimmed,
+    VT+F+R4: Cluster139.aa.ali.trimmed,
+    LG: Cluster14.aa.ali.trimmed,
+    LG+F+R4: Cluster1413.aa.ali.trimmed,
+    LG+G4: Cluster142.aa.ali.trimmed,
+    VT+R4: Cluster149.aa.ali.trimmed,
+    LG+G4: Cluster15.aa.ali.trimmed,
+    LG+F+I+G4: Cluster153.aa.ali.trimmed,
+    WAG+F+I: Cluster157.aa.ali.trimmed,
+    LG+F: Cluster160.aa.ali.trimmed,
+    JTTDCMut+F+G4: Cluster162.aa.ali.trimmed,
+    LG+R2: Cluster173.aa.ali.trimmed,
+    LG+G4: Cluster180.aa.ali.trimmed,
+    LG+G4: Cluster182.aa.ali.trimmed,
+    FLU+G4: Cluster185.aa.ali.trimmed,
+    LG+G4: Cluster19.aa.ali.trimmed,
+    LG+F+R2: Cluster192.aa.ali.trimmed,
+    LG+G4: Cluster198.aa.ali.trimmed,
+    LG+F+R3: Cluster199.aa.ali.trimmed,
+    VT+G4: Cluster2.aa.ali.trimmed,
+    VT+F+I+G4: Cluster2040.aa.ali.trimmed,
+    LG+R3: Cluster206.aa.ali.trimmed,
+    LG+F+G4: Cluster208.aa.ali.trimmed,
+    VT+I+G4: Cluster211.aa.ali.trimmed,
+    LG+F+R2: Cluster213.aa.ali.trimmed,
+    LG+G4: Cluster214.aa.ali.trimmed,
+    LG+F+G4: Cluster227.aa.ali.trimmed,
+    LG+G4: Cluster237.aa.ali.trimmed,
+    LG+G4: Cluster24.aa.ali.trimmed,
+    LG+R4: Cluster245.aa.ali.trimmed,
+    LG: Cluster247.aa.ali.trimmed,
+    LG+G4: Cluster252.aa.ali.trimmed,
+    LG+G4: Cluster253.aa.ali.trimmed,
+    Blosum62+G4: Cluster255.aa.ali.trimmed,
+    LG+G4: Cluster257.aa.ali.trimmed,
+    Blosum62: Cluster258.aa.ali.trimmed,
+    LG: Cluster259.aa.ali.trimmed,
+    LG+G4: Cluster266.aa.ali.trimmed,
+    FLU+F+G4: Cluster269.aa.ali.trimmed,
+    LG+G4: Cluster27.aa.ali.trimmed,
+    LG+R2: Cluster277.aa.ali.trimmed,
+    WAG+G4: Cluster28.aa.ali.trimmed,
+    LG+I+G4: Cluster280.aa.ali.trimmed,
+    LG+G4: Cluster29.aa.ali.trimmed,
+    LG+G4: Cluster291.aa.ali.trimmed,
+    LG+G4: Cluster293.aa.ali.trimmed,
+    LG+F+G4: Cluster294.aa.ali.trimmed,
+    cpREV+I: Cluster297.aa.ali.trimmed,
+    WAG+F+I+G4: Cluster298.aa.ali.trimmed,
+    WAG+F+R3: Cluster3.aa.ali.trimmed,
+    LG+I+G4: Cluster300.aa.ali.trimmed,
+    LG+F+G4: Cluster302.aa.ali.trimmed,
+    LG+F+G4: Cluster303.aa.ali.trimmed,
+    LG+G4: Cluster304.aa.ali.trimmed,
+    LG+G4: Cluster308.aa.ali.trimmed,
+    mtZOA+F+R2: Cluster327.aa.ali.trimmed,
+    JTT+F: Cluster337.aa.ali.trimmed,
+    LG+F+I+G4: Cluster344.aa.ali.trimmed,
+    LG+G4: Cluster353.aa.ali.trimmed,
+    LG+G4: Cluster354.aa.ali.trimmed,
+    LG+F+G4: Cluster356.aa.ali.trimmed,
+    LG+G4: Cluster360.aa.ali.trimmed,
+    LG+G4: Cluster364.aa.ali.trimmed,
+    LG+F+G4: Cluster366.aa.ali.trimmed,
+    PMB+F+I: Cluster369.aa.ali.trimmed,
+    LG+F+I+G4: Cluster374.aa.ali.trimmed,
+    LG+R3: Cluster378.aa.ali.trimmed,
+    LG+G4: Cluster38.aa.ali.trimmed,
+    LG+G4: Cluster392.aa.ali.trimmed,
+    LG+F+G4: Cluster393.aa.ali.trimmed,
+    LG+G4: Cluster394.aa.ali.trimmed,
+    Blosum62+I: Cluster4.aa.ali.trimmed,
+    VT+F+G4: Cluster417.aa.ali.trimmed,
+    LG+I+G4: Cluster427.aa.ali.trimmed,
+    VT+I: Cluster438.aa.ali.trimmed,
+    VT+R2: Cluster44.aa.ali.trimmed,
+    LG+G4: Cluster443.aa.ali.trimmed,
+    LG+R3: Cluster447.aa.ali.trimmed,
+    LG+F+I+G4: Cluster45.aa.ali.trimmed,
+    LG+F+I+G4: Cluster450.aa.ali.trimmed,
+    LG+G4: Cluster452.aa.ali.trimmed,
+    LG+F+R3: Cluster466.aa.ali.trimmed,
+    LG+F+G4: Cluster470.aa.ali.trimmed,
+    LG+I+G4: Cluster475.aa.ali.trimmed,
+    LG+G4: Cluster48.aa.ali.trimmed,
+    LG+I+G4: Cluster495.aa.ali.trimmed,
+    LG+F+I+G4: Cluster497.aa.ali.trimmed,
+    LG+F+G4: Cluster5.aa.ali.trimmed,
+    VT+F+R3: Cluster522.aa.ali.trimmed,
+    LG+G4: Cluster525.aa.ali.trimmed,
+    LG+G4: Cluster527.aa.ali.trimmed,
+    LG+R2: Cluster533.aa.ali.trimmed,
+    PMB+F+I+G4: Cluster545.aa.ali.trimmed,
+    cpREV+G4: Cluster563.aa.ali.trimmed,
+    LG+G4: Cluster57.aa.ali.trimmed,
+    LG+G4: Cluster574.aa.ali.trimmed,
+    VT+R3: Cluster577.aa.ali.trimmed,
+    LG+G4: Cluster59.aa.ali.trimmed,
+    VT+R2: Cluster599.aa.ali.trimmed,
+    LG+F+I: Cluster6.aa.ali.trimmed,
+    LG+G4: Cluster604.aa.ali.trimmed,
+    LG+G4: Cluster615.aa.ali.trimmed,
+    LG+F+G4: Cluster619.aa.ali.trimmed,
+    LG+I: Cluster62.aa.ali.trimmed,
+    LG+I+G4: Cluster633.aa.ali.trimmed,
+    VT+F+R2: Cluster653.aa.ali.trimmed,
+    LG+F+G4: Cluster657.aa.ali.trimmed,
+    LG+G4: Cluster670.aa.ali.trimmed,
+    PMB+R3: Cluster696.aa.ali.trimmed,
+    VT+F+I: Cluster7.aa.ali.trimmed,
+    WAG+F+G4: Cluster707.aa.ali.trimmed,
+    VT: Cluster73.aa.ali.trimmed,
+    WAG+F+I+G4: Cluster738.aa.ali.trimmed,
+    LG+G4: Cluster74.aa.ali.trimmed,
+    LG+F+R3: Cluster756.aa.ali.trimmed,
+    LG+I: Cluster76.aa.ali.trimmed,
+    LG+I+G4: Cluster768.aa.ali.trimmed,
+    cpREV+G4: Cluster81.aa.ali.trimmed,
+    LG+G4: Cluster82.aa.ali.trimmed,
+    LG+R4: Cluster823.aa.ali.trimmed,
+    FLU+F: Cluster84.aa.ali.trimmed,
+    LG+G4: Cluster844.aa.ali.trimmed,
+    LG+I+G4: Cluster852.aa.ali.trimmed,
+    FLU+I: Cluster864.aa.ali.trimmed,
+    LG+F+G4: Cluster886.aa.ali.trimmed,
+    LG+F+G4: Cluster893.aa.ali.trimmed,
+    Blosum62: Cluster90.aa.ali.trimmed,
+    VT+F+R4: Cluster928.aa.ali.trimmed,
+    WAG+F+I+G4: Cluster93.aa.ali.trimmed,
+    LG+R2: Cluster933.aa.ali.trimmed,
+    LG+G4: Cluster97.aa.ali.trimmed;
+end;
