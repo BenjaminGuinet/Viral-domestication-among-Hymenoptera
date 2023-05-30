@@ -1,3 +1,12 @@
+This code comes from the paper intituled : 
+"Endoparasitoid lifestyle promotes
+endogenization and domestication of
+dsDNA viruses"
+
+DOI: https://doi.org/10.7554/eLife.85993 
+
+
+
 ### Genome downloading and processing
 
 - This can be done by uploading the genomes of interest to an assembled genome sharing platform such as NCBI.
