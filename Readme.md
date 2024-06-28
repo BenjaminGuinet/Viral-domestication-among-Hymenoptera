@@ -418,7 +418,7 @@ Since few sequenced viral genomes have ETs, or rarely more than one, then the pr
 * Snakemake file : **Snakefile_TE_analysis**
 * Snakemake rules : **Extract_scaffolds, BlastX_repeat_analysis*
 
-* Script used : **Mmseqs2 search, Filter_TEs.py*
+* Script used : **Mmseqs2 search, Filter_repeat_results.py*
 
 Important file created : 
 - **/beegfs/data/bguinet/these/Results/Candidate_viral_loci_filtred_clu_filtred_aligned_taxid_ontology_interproscan_augustus_repeat.m8** (All repeat hits within scaffols containing candidates)
