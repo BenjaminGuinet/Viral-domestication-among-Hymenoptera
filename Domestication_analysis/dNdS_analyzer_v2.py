@@ -65,25 +65,6 @@ print("----------------------------------------------------------------")
 print("Beginning of the dNdS analysis for the cluster :"+Cluster_name)
 print("----------------------------------------------------------------")
 print("\n")
-"""
-#print("Charging dataframe..")
-
-#tab = pd.read_csv(DataFrame,sep="\t",header=None)
-
-#list1=["ok","Unnamed: 0","Unnamed:_0","Clustername","query",	"target",	"pident",	"alnlen",	"mismatch",	"gapopen",	"qstart",	"qend",	"tstart",	"tend",	"evalue",	"bits",	"tlen",	"Taxid","species",	"genus","family",	"no_rank",	"superkingdom",	"subfamily",	"subgenus",	"suborder",	"order",	"class",	"subphylum",	"phylum",	"superfamily",	"infraorder", "cohort",	"infraclass",	"subclass",	"kingdom"]
-#tab.columns = list1
-#tab=tab.drop(["ok"  ,"Unnamed: 0","Unnamed:_0"],axis=1)
-
-#list_of_species_to_test=[]
-#subtab = tab.loc[(tab.Clustername == Cluster_name)]
-#for index, row in subtab.iterrows():
-#  i= re.sub("([:()])","_",row["query"])
-#  list_of_species_to_test.append(i)
-#list_of_species_to_test=list(dict.fromkeys(list_of_species_to_test))
-#print(list_of_species_to_test)
-"""
-
-
 
 def sed(pattern, replace, source, dest=None, count=0):
     """Reads a source file and writes the destination file.
@@ -128,10 +109,6 @@ except:
     if not dest:
         shutil.move(name, source)
 
-#Change Nul branch length 0.0000000000 to 0.0000000012
-#sed('0.0000000000', '0.0000000012', Tree) 
-
-
 #Open the tree and the alignment codon file of the cluster of interest
 print("- The tree and the alignment codon file of the cluster of interest have been charged -")
 
@@ -160,9 +137,6 @@ list_records=list({s.rsplit('__', 1)[-1]: s for s in list_records[::-1]}.values(
 
 focal_loci=list_of_species_to_test.copy()
 list_records=list(set(list_records + focal_loci))
-#Prune tree
-#tree.prune(list_records)
-
 
 #Only temporary  code 
 list_records=[]
@@ -204,46 +178,11 @@ with open("/beegfs/data/bguinet/these/Cluster_alignment_filtred/Codon_alignment_
 
 
 Aln="/beegfs/data/bguinet/these/Cluster_alignment_filtred/Codon_alignment_clusters/"+Cluster_name+"_NT.dna_without_shift_cleaned.Pruned"
-#Aln = Aln
-#print(tree)
-#Root the tree at midpoint
-#R = tree.get_midpoint_outgroup()
-#tree.set_outgroup(R)
-#tree.unroot()
+
 new_tree=tree.write (format=0,outfile=Tree+".pruned")
 tree = EvolTree(new_tree,binpath="/beegfs/data/bguinet/TOOLS/paml4.9i/bin")
 
-#R = tree.get_midpoint_outgroup()
-#tree.set_outgroup(R)
 print(tree)
-
-#tree = EvolTree(Tree,binpath="/beegfs/data/bguinet/TOOLS/paml4.9i/bin")
-#print('type1')
-#print(type(tree))
-#print("Tree")
-#print(tree)
-
-
-
-#print(tree)
-#print("\n")
-#tree.workdir = Output_path
-
-#tree.link_to_alignment(Aln)
-
-#print('type2')
-#print(type(tree))
-
-
-#Root the tree at midpoint
-#R = tree.get_midpoint_outgroup()
-#tree.set_outgroup(R)
-#print(tree)
-#tree.unroot()
-#print('type3')
-#print(type(tree))
-
-#print(tree)
 print("\n")
 
 #Remove leafs from the tree if they where removed from the trimming process in the Codon alignment
@@ -254,9 +193,7 @@ for leaf in tree:
 List_node_to_keep=[]
 for record in SeqIO.parse(Aln, "fasta"):
   List_node_to_keep.append(record.id)
-
-
-
+	
 if len(List_leaf_node)!=len(List_node_to_keep):
 	print("étree pruned at: ",Aln,".Pruned")
 	tree.prune(List_node_to_keep)
@@ -265,12 +202,6 @@ if len(List_leaf_node)!=len(List_node_to_keep):
 	print(tree)
 print("\n")
 print('Tree of the cluster : ', Cluster_name)
-
-#print(tree)
-#print("\n")
-#tree.workdir = Output_path
-
-#tree.link_to_alignment(Aln)
 
 
 #Get nodeid 
@@ -297,57 +228,7 @@ print(df_marks)
 marks=list(df_marks['Node_id'].astype(int))
 
 tree.workdir = Output_path
-#print("Unroooott the tree")
-#tree.unroot()
 tree.link_to_alignment(Aln)
-
-
-
-"""
-#tree.run_model('b_free'+'.test_chimp',CodonFreq=4,estFreq=1,getSE=1)
-
-#b_free = tree.get_evol_model('b_free.test_chimp')
-
-#print(b_free)
-#if model_mode == "fb_neut":
-#	print("\n")
-#	print("--------------------------------------")#
-#	print("Running of the the dNdS model analysis")
-#	print("--------------------------------------")
-#	print("\n")
-#	tree.run_model('fb'+'.'+str(Cluster_name)+'_'+str(event_number),CodonFreq=4,estFreq=1)
-#	print("Model run done")
-	#Load the model 
-#tree.link_to_evol_model('/beegfs/data/bguinet/these/dNdS_analysis2/dNdS_results2/fb'+'.'+str(Cluster_name)+'_'+str(event_number)+'/out', 'fb')
-#for model in  tree._models:
-#	model=tree.get_evol_model(model)
-#print(model)
-#Here we will get the model ouput in a dataframe :
-#df = pd.read_csv(StringIO(model.__str__()), skiprows=6,names=['marks','omega','node_ids','name'])
-#df = df.applymap(lambda x: x.split(":")[1])
-#Remove white space
-#df=df.applymap(str.strip).rename(columns=str.strip)
-#print(df)
-#marks=[]
-#omega=[]
-#for i in list_of_species_to_test:
-#    print(i)
-#    s = df.loc[df['name'] == i,'node_ids']
-#    print("s:",s)
-    #dNdS = df.loc[df['name'] == i,'omega']
-    #print(dNdS)
-    #dNdS = float(dNdS)
-    #s=int(s)
-    #print("dNdS of",i," equal: ", dNdS)
-    #print(dNdS)
-    #omega.append(dNdS)
-#    marks.append(s)
-#print("Node marked :")
-#for i in list_of_species_to_test:
-#   print("- ",i)
-#dNdS_average=statistics.mean(omega)
-#print("dN/dS average is :",statistics.mean(omega))
-"""
 
 
 print("\n")
@@ -355,8 +236,6 @@ print("-------------------------------------------------------------------------
 print(".  Adding of node marks...                                               ")
 print(".  the marks will allow to force the loci to be set to a dN/dS value =1  ")
 print("-------------------------------------------------------------------------")
-
-
 
 # mark a group of branches of interest
 tree.mark_tree(marks, ['#1'])
@@ -376,7 +255,6 @@ if os.path.isdir('/beegfs/data/bguinet/these/dNdS_analysis_filtred/dNdS_results/
 if os.path.isdir('/beegfs/data/bguinet/these/dNdS_analysis_filtred/dNdS_results/b_free'+'.'+str(Cluster_name)+'_'+str(event_number)):
  shutil.rmtree('/beegfs/data/bguinet/these/dNdS_analysis_filtred/dNdS_results/b_free'+'.'+str(Cluster_name)+'_'+str(event_number)+'/')
 
-
 if model_mode == "fb_neut" or model_mode=="ALL":
 	tree.run_model('b_neut'+'.'+str(Cluster_name)+'_'+str(event_number),CodonFreq=4,estFreq=1,getSE=1,noisy=3,verbose=1)
 	print("neutral model analysis done.")
@@ -392,8 +270,6 @@ if model_mode == "free" or model_mode == "ALL":
 	tree.link_to_evol_model('/beegfs/data/bguinet/these/dNdS_analysis_filtred/dNdS_results/b_neut'+'.'+str(Cluster_name)+'_'+str(event_number)+'/out', 'b_neut')
 	for model in  tree._models:
 		fb_model_neut=tree.get_evol_model(model)
-	#fb_model_neut = tree.get_evol_model('b_neut'+"."+Cluster_name+"_"+event_number)
-	#fb_model_free = tree.get_evol_model("b_free"+"."+Cluster_name+"_"+str(event_number))
 	tree.link_to_evol_model('/beegfs/data/bguinet/these/dNdS_analysis_filtred/dNdS_results/b_free'+'.'+str(Cluster_name)+'_'+str(event_number)+'/out', 'b_free')
 	for model in  tree._models:
 		fb_model_free=tree.get_evol_model(model)
